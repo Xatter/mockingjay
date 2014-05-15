@@ -9,12 +9,16 @@ from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
 from ws4py.websocket import WebSocket
 from ws4py.messaging import TextMessage
 
+
 class ChatWebSocketHandler(WebSocket):
     def received_message(self, m):
         cherrypy.engine.publish('websocket-broadcast', m)
 
     def closed(self, code, reason="A client left the room without a proper explanation."):
         cherrypy.engine.publish('websocket-broadcast', TextMessage(reason))
+
+from jinja2 import Environment as Jinja2Environment, FileSystemLoader
+jinja2_env = Jinja2Environment(loader=FileSystemLoader('app'))
 
 class Root(object):
     def __init__(self, host, port, ssl=False):
@@ -24,64 +28,8 @@ class Root(object):
 
     @cherrypy.expose
     def index(self):
-        return """<html>
-    <head>
-      <script type='application/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js'></script>
-      <script type='application/javascript'>
-        $(document).ready(function() {
-
-          websocket = '%(scheme)s://%(host)s:%(port)s/ws';
-          if (window.WebSocket) {
-            ws = new WebSocket(websocket);
-          }
-          else if (window.MozWebSocket) {
-            ws = MozWebSocket(websocket);
-          }
-          else {
-            console.log('WebSocket Not Supported');
-            return;
-          }
-
-          window.onbeforeunload = function(e) {
-            $('#chat').val($('#chat').val() + 'Bye bye...\\n');
-            ws.close(1000, '%(username)s left the room');
-
-            if(!e) e = window.event;
-            e.stopPropagation();
-            e.preventDefault();
-          };
-          ws.onmessage = function (evt) {
-            var $chatWindow = $('#chat')
-             $chatWindow.val($('#chat').val() + evt.data + '\\n');
-             $chatWindow.scrollTop($chatWindow[0].scrollHeight - $chatWindow.height());
-          };
-          ws.onopen = function() {
-             ws.send("%(username)s entered the room");
-          };
-          ws.onclose = function(evt) {
-             $('#chat').val($('#chat').val() + 'Connection closed by server: ' + evt.code + ' \"' + evt.reason + '\"\\n');
-          };
-
-          $('#send').click(function() {
-             console.log($('#message').val());
-             ws.send('%(username)s: ' + $('#message').val());
-             $('#message').val("");
-             return false;
-          });
-        });
-      </script>
-    </head>
-    <body>
-    <h2>MockingJay</h2>
-    <form action='#' id='chatform' method='get'>
-      <textarea id='chat' cols='35' rows='10'></textarea>
-      <br />
-      <label for='message'>%(username)s: </label><input type='text' id='message' />
-      <input id='send' type='submit' value='Send' />
-      </form>
-    </body>
-    </html>
-    """ % {'username': "User%d" % random.randint(0, 100), 'host': self.host, 'port': self.port, 'scheme': self.scheme}
+        tmpl = jinja2_env.get_template("views/main.html")
+        return tmpl.render(username="something", port=self.port, host=self.host, scheme=self.scheme)
 
     @cherrypy.expose
     def ws(self):
@@ -93,7 +41,7 @@ if __name__ == '__main__':
     configure_logger(level=logging.DEBUG)
 
     parser = argparse.ArgumentParser(description='Echo CherryPy Server')
-    parser.add_argument('--host', default='127.0.0.1')
+    parser.add_argument('--host', default='0.0.0.0')
     parser.add_argument('-p', '--port', default=9000, type=int)
     parser.add_argument('--ssl', action='store_true')
     args = parser.parse_args()
@@ -109,14 +57,19 @@ if __name__ == '__main__':
     WebSocketPlugin(cherrypy.engine).subscribe()
     cherrypy.tools.websocket = WebSocketTool()
 
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
     cherrypy.quickstart(Root(args.host, args.port, args.ssl), '', config={
+        '/': {
+            'tools.staticdir.root': os.path.join(current_dir, 'app'),
+        },
         '/ws': {
             'tools.websocket.on': True,
             'tools.websocket.handler_cls': ChatWebSocketHandler
             },
-        '/js': {
+        '/styles': {
               'tools.staticdir.on': True,
-              'tools.staticdir.dir': 'js'
+              'tools.staticdir.dir': 'styles'
             }
         }
     )
