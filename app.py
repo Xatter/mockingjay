@@ -29,7 +29,7 @@ class Root(object):
     @cherrypy.expose
     def index(self):
         tmpl = jinja2_env.get_template("views/main.html")
-        return tmpl.render(username="something", port=self.port, host=self.host, scheme=self.scheme)
+        return tmpl.render(username="User%d" % (random.randrange(0,101,2)) , port=self.port, host=self.host, scheme=self.scheme)
 
     @cherrypy.expose
     def ws(self):

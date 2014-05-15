@@ -1,53 +1,9 @@
 <html>
 <head>
-  <script type='application/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js'></script>
-  <script type='application/javascript'>
-    var username = '{{username}}';
-    $(document).ready(function() {
-      var unreadCount = 0;
-
-      websocket = '{{scheme}}://' + location.hostname + ':{{port}}/ws';
-      if (window.WebSocket) {
-        ws = new WebSocket(websocket);
-      }
-      else if (window.MozWebSocket) {
-        ws = MozWebSocket(websocket);
-      }
-      else {
-        console.log('WebSocket Not Supported');
-        return;
-      }
-
-      window.onbeforeunload = function(e) {
-        $('#chat').val($('#chat').val() + 'Bye bye...\\n');
-        ws.close(1000, username + ' left the room');
-
-        if(!e) e = window.event;
-        e.stopPropagation();
-        e.preventDefault();
-      };
-      ws.onmessage = function (evt) {
-        var $chatWindow = $('#chat');
-        $chatWindow.append("<div class='user-container'>" + evt.data + "</div>");
-        $(window).scrollTop($(window).height());
-      };
-      ws.onopen = function() {
-         ws.send(username + " entered the room");
-      };
-      ws.onclose = function(evt) {
-         $('#chat').val($('#chat').val() + 'Connection closed by server: ' + evt.code + ' \"' + evt.reason + '\"\\n');
-      };
-
-      $('#send').click(function() {
-         console.log($('#message').val());
-         ws.send(username + ': ' + $('#message').val());
-         $('#message').val("");
-         return false;
-      });
-    });
-   </script>
    <!-- <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css"/> -->
    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootswatch/3.1.1/journal/bootstrap.min.css">
+   <!-- <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootswatch/3.1.1/readable/bootstrap.min.css"> -->
+   <!-- <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootswatch/3.1.1/lumen/bootstrap.min.css"> -->
    <link rel="stylesheet" href="/styles/main.css" type="text/css" media="screen" title="no title" charset="utf-8">
 </head>
 <body>
@@ -86,11 +42,66 @@
       </div>
 
       <div id="input-area">
-        <div>Jim</div>
-        <div><input type="text" id="message"/><input id="send" type="submit" value='Send'/></div>
+        <div><span id="username">{{username}}</span><input type="text" id="message"/><input id="send" type="submit" value='Send'/></div>
       </div>
     </div>
 
+  <script type='application/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js'></script>
   <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+  <script type='application/javascript'>
+    var username = '{{username}}';
+    $(document).ready(function() {
+      var unreadCount = 0;
+
+      websocket = '{{scheme}}://' + location.hostname + ':{{port}}/ws';
+      if (window.WebSocket) {
+        ws = new WebSocket(websocket);
+      }
+      else if (window.MozWebSocket) {
+        ws = MozWebSocket(websocket);
+      }
+      else {
+        console.log('WebSocket Not Supported');
+        return;
+      }
+
+      window.onbeforeunload = function(e) {
+        $('#chat').val($('#chat').val() + 'Bye bye...\\n');
+        ws.close(1000, username + ' left the room');
+
+        if(!e) e = window.event;
+        e.stopPropagation();
+        e.preventDefault();
+      };
+      ws.onmessage = function (evt) {
+        var $chatWindow = $('#chat');
+        $chatWindow.append("<div class='user-container'>" + evt.data + "</div>");
+        $(window).scrollTop($(window).height());
+      };
+      ws.onopen = function() {
+         ws.send(username + " entered the room");
+      };
+      ws.onclose = function(evt) {
+         $('#chat').val($('#chat').val() + 'Connection closed by server: ' + evt.code + ' \"' + evt.reason + '\"\\n');
+      };
+
+      function sendMessage() {
+         ws.send(username + ': ' + $('#message').val());
+         $('#message').val("");
+         return false;
+      }
+
+      $('#send').click(function() {
+        return sendMessage();
+      });
+
+      $('#message').keypress(function(e) {
+        console.log("came here");
+        if (e.which == 13) {
+          return sendMessage();
+        }
+      });
+    });
+   </script>
 </body>
 </html>
