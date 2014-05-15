@@ -51,7 +51,9 @@ class Root(object):
             e.preventDefault();
           };
           ws.onmessage = function (evt) {
-             $('#chat').val($('#chat').val() + evt.data + '\\n');
+            var $chatWindow = $('#chat')
+             $chatWindow.val($('#chat').val() + evt.data + '\\n');
+             $chatWindow.scrollTop($chatWindow[0].scrollHeight - $chatWindow.height());
           };
           ws.onopen = function() {
              ws.send("%(username)s entered the room");
@@ -70,6 +72,7 @@ class Root(object):
       </script>
     </head>
     <body>
+    <h2>MockingJay</h2>
     <form action='#' id='chatform' method='get'>
       <textarea id='chat' cols='35' rows='10'></textarea>
       <br />
