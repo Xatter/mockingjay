@@ -2,18 +2,56 @@
 import argparse
 import random
 import os
-
 import cherrypy
+import json
 
 from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
 from ws4py.websocket import WebSocket
 from ws4py.messaging import TextMessage
 
+class MSG_TYPE:
+    ADMIN = 'ADMIN'
+    MSG   = 'MSG'
+    
+class MSG_SUB_TYPE:
+    OPEN = 'OPEN'
+    NAME_CHANGE = 'NAME_CHANGE'
+    TEXT = 'TEXT'
+    
 
 class ChatWebSocketHandler(WebSocket):
+    def __init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=None):
+        WebSocket.__init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=10)
+    
+    def opened(self):
+        pass
+    
+    def publish_text_msg(self, text):
+        cherrypy.engine.publish('websocket-broadcast', TextMessage(text))
+    
     def received_message(self, m):
-        cherrypy.engine.publish('websocket-broadcast', m)
+        msg = json.loads(m.data)
+        if msg['msg_type'] == MSG_TYPE.ADMIN:
+            self.handle_admin(msg)
+        elif msg['msg_type'] == MSG_TYPE.MSG:
+            self.handle_msg(msg)
+        else:
+            cherrypy.log("Uknown msg_type received [%s] RAW: %s"% (msg['msg_type'], msg))
+        
+    def handle_admin(self, msg):
+        if msg['msg_sub_type'] == MSG_SUB_TYPE.NAME_CHANGE:
+            self.publish_text_msg(msg['username'] + " Changed his name to: " + msg['data'])
+        elif msg['msg_sub_type'] == MSG_SUB_TYPE.OPEN:
+            self.publish_text_msg(msg['data'] + " Entered Room")
+        else:
+            cherrypy.log("Uknown sub_msg_type received [%s] RAW: %s"% (msg['msg_sub_type'], msg))
 
+    def handle_msg(self, msg):
+        if msg['msg_sub_type'] == MSG_SUB_TYPE.TEXT:
+            self.publish_text_msg( msg['username'] + ": " + msg['data'])
+        else:
+            cherrypy.log("Uknown sub_msg_type received [%s] RAW: %s"% (msg['msg_sub_type'], msg))
+       
     def closed(self, code, reason="A client left the room without a proper explanation."):
         cherrypy.engine.publish('websocket-broadcast', TextMessage(reason))
 

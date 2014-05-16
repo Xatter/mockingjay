@@ -36,7 +36,7 @@ Add `~/.local/bin` to your `$PATH` variable
 Then activate the virtualenv and install the requirements:
 
     $ virtualenv venv
-    $ source venv/bin/activate
+    $ source venv/bin/activate (on windows it's > venv\Scripts\activate.bat)
     $ pip install -r requirements.txt
 
 Then run and connect:
