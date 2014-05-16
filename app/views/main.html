@@ -112,7 +112,7 @@
         };
 
         ws.onopen = function() {
-           ws.send(username + " entered the room");
+            ws.send(JSON.stringify({username: username, msg_type: "ADMIN", msg_sub_type: "OPEN", data: username}))
         };
 
         ws.onclose = function(evt) {
@@ -127,12 +127,12 @@
           if (value[0] == '/') {
             if(value.substring(0,5) == '/nick') {
               var newUsername = value.substring(6,value.length);
-              ws.send(username + " changed nickname to " + newUsername);
+              ws.send(JSON.stringify({username: username, msg_type: "ADMIN", msg_sub_type: "NAME_CHANGE", data: newUsername}))
               username = newUsername;
               // TODO: save this to local storage as a preference
             }
           } else {
-            ws.send(username + ': ' + value);
+            ws.send(JSON.stringify({username: username, msg_type: "MSG", msg_sub_type: "TEXT", data: value}))
           }
 
           $message.val("");
