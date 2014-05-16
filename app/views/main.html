@@ -1,141 +1,153 @@
 <html>
-<head>
-   <!-- <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css"/> -->
-   <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootswatch/3.1.1/journal/bootstrap.min.css">
-   <!-- <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootswatch/3.1.1/readable/bootstrap.min.css"> -->
-   <!-- <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootswatch/3.1.1/lumen/bootstrap.min.css"> -->
-   <link rel="stylesheet" href="/styles/main.css" type="text/css" media="screen" title="no title" charset="utf-8">
-</head>
-<body>
-  <h2>MockingJay</h2>
-  <div class="navbar navbar-default navbar-fixed-top">
-      <div class="container">
-        <div class="navbar-header">
-          <a href="../" class="navbar-brand">MockingJay</a>
-          <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-main">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-        </div>
-        <div class="navbar-collapse collapse" id="navbar-main">
-          <ul class="nav navbar-nav">
-            <li>
-              <a href="../help/">Help</a>
-            </li>
-            <li>
-              <a href="http://news.bootswatch.com">Blog</a>
-            </li>
-          </ul>
+  <head>
+     <!-- <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css"/> -->
+     <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootswatch/3.1.1/journal/bootstrap.min.css">
+     <!-- <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootswatch/3.1.1/readable/bootstrap.min.css"> -->
+     <!-- <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootswatch/3.1.1/lumen/bootstrap.min.css"> -->
+     <link rel="stylesheet" href="/styles/main.css" type="text/css" media="screen" title="no title" charset="utf-8">
+  </head>
+  <body>
+    <h2>MockingJay</h2>
+    <div class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+          <div class="navbar-header">
+            <a href="../" class="navbar-brand">MockingJay</a>
+            <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-main">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+          </div>
+          <div class="navbar-collapse collapse" id="navbar-main">
+            <ul class="nav navbar-nav">
+              <li>
+                <a href="../help/">Help</a>
+              </li>
+            </ul>
 
-          <ul class="nav navbar-nav navbar-right">
-            <li><a href="http://builtwithbootstrap.com/" target="_blank">Built With Bootstrap</a></li>
-            <li><a href="https://wrapbootstrap.com/?ref=bsw" target="_blank">WrapBootstrap</a></li>
-          </ul>
+            <ul class="nav navbar-nav navbar-right">
+              <li><a href="http://builtwithbootstrap.com/" target="_blank">Built With Bootstrap</a></li>
+              <li><a href="https://wrapbootstrap.com/?ref=bsw" target="_blank">WrapBootstrap</a></li>
+            </ul>
 
+          </div>
         </div>
       </div>
-    </div>
 
-    <div id="main">
-      <div id="chat" style="display: block;">
-      </div>
+      <div id="main">
+        <div id="chat" style="display: block;">
+        </div>
 
-      <div id="input-area">
+        <div id="input-area">
 
-        <div class="input-group">
-          <span class="input-group-addon">Say:</span>
-          <input type="text" class="form-control" id="message">
-          <span class="input-group-btn">
-            <button class="btn btn-default">Send</button>
-          </span>
+          <div class="input-group">
+            <span class="input-group-addon">Say:</span>
+            <input type="text" class="form-control" id="message">
+            <span class="input-group-btn">
+              <button class="btn btn-default">Send</button>
+            </span>
+          </div>
         </div>
       </div>
-    </div>
 
-  <script type='application/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js'></script>
-  <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-  <script type='application/javascript'>
-    var username = '{{username}}';
-    $(document).ready(function() {
-      var unreadCount = 0;
-      var $chatWindow = $('#chat');
+    <script type='application/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js'></script>
+    <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script type='application/javascript'>
+      var username = '{{username}}';
+      $(document).ready(function() {
+        var unreadCount = 0;
+        var $chatWindow = $('#chat');
 
-      websocket = '{{scheme}}://' + location.hostname + ':{{port}}/ws';
-      if (window.WebSocket) {
-        ws = new WebSocket(websocket);
-      }
-      else if (window.MozWebSocket) {
-        ws = MozWebSocket(websocket);
-      }
-      else {
-        console.log('WebSocket Not Supported');
-        return;
-      }
-
-      function addMessageToChat(msg) {
-        $chatWindow.append("<div class='user-container'>" + msg + "</div>");
-        $(window).scrollTop($(window).height());
-
-        // Prevent the window from getting too full and slowing everything down.
-        if ($chatWindow.children().length > 200) {
-          $chatWindow.children()[0].remove();
+        websocket = '{{scheme}}://' + location.hostname + ':{{port}}/ws';
+        if (window.WebSocket) {
+          ws = new WebSocket(websocket);
+        }
+        else if (window.MozWebSocket) {
+          ws = MozWebSocket(websocket);
+        }
+        else {
+          console.log('WebSocket Not Supported');
+          return;
         }
 
-        unreadCount++;
-        updateTitle();
-      }
+        function addMessageToChat(msg) {
+          $chatWindow.append("<div class='user-container'>" + msg + "</div>");
+          $(window).scrollTop($(window).height());
 
-      function updateTitle() {
-        var title = "MockingJay";
-        if (unreadCount > 0) {
-          title += " (" + unreadCount + ")";
+          // Prevent the window from getting too full and slowing everything down.
+          if ($chatWindow.children().length > 200) {
+            $chatWindow.children()[0].remove();
+          }
+
+          unreadCount++;
+          updateTitle();
         }
 
-        document.title = title;
-      }
+        function updateTitle() {
+          var title = "MockingJay";
+          if (unreadCount > 0) {
+            title += " (" + unreadCount + ")";
+          }
 
-      window.onbeforeunload = function(e) {
-        addMessageToChat('Bye bye...');
-        ws.close(1000, username + ' left the room');
+          document.title = title;
+        }
 
-        if(!e) e = window.event;
-        e.stopPropagation();
-        e.preventDefault();
-      };
+        window.onbeforeunload = function(e) {
+          addMessageToChat('Bye bye...');
+          ws.close(1000, username + ' left the room');
 
-      window.onmousemove = function(e) {
-        unreadCount = 0;
-        updateTitle();
-      };
+          if(!e) e = window.event;
+          e.stopPropagation();
+          e.preventDefault();
+        };
 
-      ws.onmessage = function (evt) {
-        addMessageToChat(evt.data);
-      };
-      ws.onopen = function() {
-         ws.send(username + " entered the room");
-      };
+        window.onmousemove = function(e) {
+          unreadCount = 0;
+          updateTitle();
+        };
 
-      ws.onclose = function(evt) {
-         addMessageToChat('Connection closed by server: ' + evt.code + ' \"' + evt.reason);
-      };
+        ws.onmessage = function (evt) {
+          addMessageToChat(evt.data);
+        };
 
-      function sendMessage() {
-        ws.send(username + ': ' + $('#message').val());
-        $('#message').val("");
-        return false;
-      }
+        ws.onopen = function() {
+           ws.send(username + " entered the room");
+        };
 
-      $('#send').click(function() {
-        return sendMessage();
-      });
+        ws.onclose = function(evt) {
+           addMessageToChat('Connection closed by server: ' + evt.code + ' \"' + evt.reason);
+        };
 
-      $('#message').keypress(function(e) {
-        if (e.which == 13) {
+        function sendMessage() {
+          var $message = $('#message');
+          var value = $message.val();
+
+          if (value[0] == '/') {
+            if(value.substring(0,5) == '/nick') {
+              var newUsername = value.substring(6,value.length);
+              ws.send(username + " changed nickname to " + newUsername);
+              username = newUsername;
+            }
+          } else {
+            ws.send(username + ': ' + value);
+          }
+
+          $message.val("");
+          return false;
+        }
+
+        $('#send').click(function() {
           return sendMessage();
-        }
+        });
+
+        $('#message').keypress(function(e) {
+          if (e.which == 13) {
+            return sendMessage();
+          }
+        });
+
+        addMessageToChat("Welcome, " + username + " if you would like to change your name type '/nick [username]' into the chat box below.");
       });
-    });
-   </script>
-</body>
+     </script>
+  </body>
 </html>
