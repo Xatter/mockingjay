@@ -81,6 +81,18 @@
         if ($chatWindow.children().length > 200) {
           $chatWindow.children()[0].remove();
         }
+
+        unreadCount++;
+        updateTitle();
+      }
+
+      function updateTitle() {
+        var title = "MockingJay";
+        if (unreadCount > 0) {
+          title += " (" + unreadCount + ")";
+        }
+
+        document.title = title;
       }
 
       window.onbeforeunload = function(e) {
@@ -90,6 +102,11 @@
         if(!e) e = window.event;
         e.stopPropagation();
         e.preventDefault();
+      };
+
+      window.onmousemove = function(e) {
+        unreadCount = 0;
+        updateTitle();
       };
 
       ws.onmessage = function (evt) {
