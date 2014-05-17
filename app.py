@@ -3,6 +3,7 @@ import argparse
 import random
 import os
 import cherrypy
+
 import json
 
 from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
@@ -18,6 +19,7 @@ class MSG_SUB_TYPE:
     NAME_CHANGE = 'NAME_CHANGE'
     TEXT = 'TEXT'
     
+CONNECTED_USERS = {}
 
 class ChatWebSocketHandler(WebSocket):
     def __init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=None):
@@ -25,7 +27,7 @@ class ChatWebSocketHandler(WebSocket):
     
     def opened(self):
         pass
-    
+
     def publish_text_msg(self, text):
         cherrypy.engine.publish('websocket-broadcast', TextMessage(text))
     
@@ -41,8 +43,11 @@ class ChatWebSocketHandler(WebSocket):
     def handle_admin(self, msg):
         if msg['msg_sub_type'] == MSG_SUB_TYPE.NAME_CHANGE:
             self.publish_text_msg(msg['username'] + " Changed his name to: " + msg['data'])
+            CONNECTED_USERS[msg['data']] = CONNECTED_USERS.pop(msg['username'])
+            self.publish_text_msg("Connected users: " + str(CONNECTED_USERS.keys()))
         elif msg['msg_sub_type'] == MSG_SUB_TYPE.OPEN:
             self.publish_text_msg(msg['data'] + " Entered Room")
+            self.publish_text_msg("Connected users: " + str(CONNECTED_USERS.keys()))
         else:
             cherrypy.log("Uknown sub_msg_type received [%s] RAW: %s"% (msg['msg_sub_type'], msg))
 
@@ -67,7 +72,9 @@ class Root(object):
     @cherrypy.expose
     def index(self):
         tmpl = jinja2_env.get_template("views/main.html")
-        return tmpl.render(username="User%d" % (random.randrange(0,101,2)) , port=self.port, host=self.host, scheme=self.scheme)
+        username = "User%d" % (random.randrange(0,101,2))
+        CONNECTED_USERS[username] = (cherrypy.request.remote.ip, cherrypy.request.remote.port)
+        return tmpl.render(username= username , port=self.port, host=self.host, scheme=self.scheme)
 
     @cherrypy.expose
     def ws(self):
