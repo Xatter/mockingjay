@@ -5,6 +5,7 @@
      <!-- <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootswatch/3.1.1/readable/bootstrap.min.css"> -->
      <!-- <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootswatch/3.1.1/lumen/bootstrap.min.css"> -->
      <link rel="stylesheet" href="/styles/main.css" type="text/css" media="screen" title="no title" charset="utf-8">
+     <script type='text/javascript' src='scripts/jquery.min.js'></script>
   </head>
   <body>
     <h2>MockingJay</h2>
@@ -39,7 +40,6 @@
         </div>
 
         <div id="input-area">
-
           <div class="input-group">
             <span class="input-group-addon">Say:</span>
             <input type="text" class="form-control" id="message">
@@ -48,9 +48,13 @@
             </span>
           </div>
         </div>
+
+      <div id="sidebar">
+          <h3>Room List</h3>
+          <div id="room_list"></div>
+      </div>
       </div>
 
-    <script type='text/javascript' src='scripts/jquery.min.js'></script>
     <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <script type='text/javascript'>
         var username = 'Jim';

@@ -29,15 +29,24 @@ class ChatWebSocketHandler(WebSocket):
 
     def send_message(self, msg):
         cherrypy.engine.publish('websocket-broadcast', TextMessage(json.dumps(msg)))
-    
+
+    def send_room_list(self):
+        room_list_msg = {
+            "type": "INFO",
+            "info": "ROOM_LIST",
+            "data": self.room_list
+        }
+        self.send_message(room_list_msg)
+
     def received_message(self, m):
         return_msg = msg = json.loads(m.data)
-        print msg
+        cherrypy.log("Recieved: %s" % msg)
 
         if msg['type'] == "CMD":
             if msg['command'] == "NAME_CHANGE":
                 self.room_list[self.room_list.index(msg['username'])] =  msg['new_name']
                 self.room_list.sort()
+                self.send_room_list()
 
                 return_msg = {
                     "type": "EVENT",
@@ -48,13 +57,18 @@ class ChatWebSocketHandler(WebSocket):
         elif msg['type'] == "EVENT":
             if msg['event'] == "SIGN_ON":
                 userid = 'User%d' % (random.randrange(0,100))
+                self.room_list.append(userid)
+                self.room_list.sort()
+                self.send_room_list()
                 return_msg = {
                     "type": 'EVENT',
                     "event": 'SIGN_ON',
                     "username": userid
                 }
-                self.room_list.append(userid)
-                self.room_list.sort()
+            elif msg['event'] == "SIGN_OFF":
+                self.room_list.remove(msg['username'])
+                self.send_room_list()
+                return
 
         self.send_message(return_msg)
 
@@ -119,5 +133,4 @@ if __name__ == '__main__':
             'tools.staticdir.on': True,
             'tools.staticdir.dir': 'scripts'
         }
-        }
-    )
+    })

@@ -1,6 +1,8 @@
 $(function() {
     var unreadCount = 0;
     var $chatWindow = $('#chat');
+    var $roomList = $('#room_list');
+    var roomList = [];
 
     var websocket = scheme + "://" + location.hostname + ":" + port + "/ws";
 
@@ -50,7 +52,15 @@ $(function() {
 
     window.onbeforeunload = function(e) {
         addMessageToChat('Bye bye...');
-        ws.close(1000, username + ' left the room');
+
+        msg = {
+            type: 'EVENT',
+            event: 'SIGN_OFF',
+            username: username
+        }
+
+        ws.send(JSON.stringify(msg));
+        ws.close(1000, username + " left the chat..");
 
         if(!e) e = window.event;
         e.stopPropagation();
@@ -63,8 +73,8 @@ $(function() {
     };
 
     ws.onmessage = function (evt) {
-        console.log(evt.data);
         msg = JSON.parse(evt.data);
+        console.log(msg)
         if (msg.type == "EVENT") {
             if (msg.event == "SIGN_ON") {
                 username = msg.username;
@@ -73,6 +83,14 @@ $(function() {
             } else  if (msg.event == "NAME_CHANGED") {
                 username = msg.new_name;
                 addEventToChat(msg.username + " changed name to " + msg.new_name);
+            }
+        } else if (msg.type == "INFO") {
+            if (msg.info == "ROOM_LIST") {
+                roomList = msg.data
+                $roomList.empty()
+                for(var i = 0;i<roomList.length;i++) {
+                    $roomList.append("<div>"+ roomList[i] + "</div>");
+                }
             }
         } else {
             addMessageToChat(msg.data);

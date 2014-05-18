@@ -22,3 +22,15 @@
 	background: transparent;
 	position: relative;
 }
+
+#sidebar {
+    position: fixed;
+    z-index: 2;
+    right: 0px;
+    top: 0px;
+    width: 28%;
+    height: 100%;
+    padding: 60px 10px 0px 0px;
+    background: transparent;
+    color: #222222;
+}
