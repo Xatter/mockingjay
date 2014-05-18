@@ -26,16 +26,16 @@ class ChatWebSocketHandler(WebSocket):
     def opened(self):
         pass
 
-    def send_message(self, msg):
+    def broadast_message(self, msg):
         cherrypy.engine.publish('websocket-broadcast', TextMessage(json.dumps(msg)))
 
-    def send_room_list(self):
+    def broadcast_room_list(self):
         room_list_msg = {
             "type": "INFO",
             "info": "ROOM_LIST",
             "data": self.room_list
         }
-        self.send_message(room_list_msg)
+        self.broadast_message(room_list_msg)
 
     def received_message(self, m):
         return_msg = msg = json.loads(m.data)
@@ -46,7 +46,7 @@ class ChatWebSocketHandler(WebSocket):
             if msg['command'] == "NAME_CHANGE":
                 self.room_list[self.room_list.index(msg['username'])] =  msg['new_name']
                 self.room_list.sort()
-                self.send_room_list()
+                self.broadcast_room_list()
 
                 return_msg = {
                     "type": "EVENT",
@@ -59,9 +59,9 @@ class ChatWebSocketHandler(WebSocket):
                 userid = 'User%d' % (random.randrange(0,100))
                 self.room_list.append(userid)
                 self.room_list.sort()
-                self.send_room_list()
+                self.broadcast_room_list()
                 msg['username'] = userid
-                self.send(json.dumps(msg), m.is_binary)
+                self.send(json.dumps(msg), False)
                 return_msg = {
                     "type": 'EVENT',
                     "event": 'SIGN_ON',
@@ -69,10 +69,10 @@ class ChatWebSocketHandler(WebSocket):
                 }
             elif msg['event'] == "SIGN_OFF":
                 self.room_list.remove(msg['username'])
-                self.send_room_list()
+                self.broadcast_room_list()
                 return
 
-        self.send_message(return_msg)
+        self.broadast_message(return_msg)
 
     def closed(self, code, reason="A client left the room without a proper explanation."):
         cherrypy.engine.publish('websocket-broadcast', TextMessage(reason))
