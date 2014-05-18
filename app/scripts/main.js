@@ -35,7 +35,10 @@ $(function() {
         text = linkify(text);
 
         // TODO: Move into ChatWindow class, add different categories of messages: info, say, event, etc.
-        $chatWindow.append("<div class='user-container'><strong>" + msg.username + ":</strong> " + text + "</div>");
+        var date = new Date();
+        var time = date.toLocaleTimeString();
+
+        $chatWindow.append("<div class='user-container'><i>[" + time + "] </i><strong>" +  msg.username + ":</strong> " + text + "</div>");
         updateChatWindow();
     }
 
