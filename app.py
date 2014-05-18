@@ -3,6 +3,7 @@ import argparse
 import random
 import os
 import cherrypy
+
 import json
 
 from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
@@ -17,8 +18,6 @@ class MSG_SUB_TYPE:
     OPEN = 'OPEN'
     NAME_CHANGE = 'NAME_CHANGE'
     TEXT = 'TEXT'
-
-
 class ChatWebSocketHandler(WebSocket):
     room_list = []
     def __init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=None):
