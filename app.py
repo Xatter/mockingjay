@@ -57,6 +57,9 @@ class ChatWebSocketHandler(WebSocket):
         elif msg['type'] == "EVENT":
             if msg['event'] == "FIRST_SIGN_ON":
                 userid = 'User%d' % (random.randrange(0,100))
+                if 'username' in msg:
+                    userid = msg['username']
+
                 self.room_list.append(userid)
                 self.room_list.sort()
                 self.broadcast_room_list()

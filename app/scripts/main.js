@@ -86,6 +86,7 @@ $(function() {
             } else  if (msg.event == "NAME_CHANGED") {
                 if (msg.username == username) {
                     username = msg.new_name;
+                    window.localStorage['username'] = username;
                 }
                 addEventToChat(msg.username + " changed name to " + msg.new_name);
             }
@@ -108,6 +109,10 @@ $(function() {
             event: 'FIRST_SIGN_ON'
         };
 
+        if (window.localStorage['username']) {
+            msg.username = window.localStorage['username'];
+        }
+
         ws.send(JSON.stringify(msg));
     };
 
@@ -124,7 +129,6 @@ $(function() {
             if(value.substring(0,5) == '/nick') {
                 var newUsername = value.substring(6,value.length);
                 ws.send(JSON.stringify({username: username, type: "CMD", command: "NAME_CHANGE", new_name: newUsername}))
-                username = newUsername;
                 // TODO: save this to local storage as a preference
             }
         } else {
