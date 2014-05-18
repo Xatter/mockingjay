@@ -41,6 +41,7 @@ class ChatWebSocketHandler(WebSocket):
         return_msg = msg = json.loads(m.data)
         cherrypy.log("Recieved: %s" % msg)
 
+        # eventually this if thing should be a pub/sub or some other event/factory pattern
         if msg['type'] == "CMD":
             if msg['command'] == "NAME_CHANGE":
                 self.room_list[self.room_list.index(msg['username'])] =  msg['new_name']
@@ -54,11 +55,13 @@ class ChatWebSocketHandler(WebSocket):
                     "new_name": msg['new_name']
                 }
         elif msg['type'] == "EVENT":
-            if msg['event'] == "SIGN_ON":
+            if msg['event'] == "FIRST_SIGN_ON":
                 userid = 'User%d' % (random.randrange(0,100))
                 self.room_list.append(userid)
                 self.room_list.sort()
                 self.send_room_list()
+                msg['username'] = userid
+                self.send(json.dumps(msg), m.is_binary)
                 return_msg = {
                     "type": 'EVENT',
                     "event": 'SIGN_ON',

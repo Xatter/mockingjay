@@ -32,7 +32,7 @@ $(function() {
 
     function addMessageToChat(msg) {
         // TODO: Move into ChatWindow class, add different categories of messages: info, say, event, etc.
-        $chatWindow.append("<div class='user-container'><strong>" + username + ":</strong> " + msg + "</div>");
+        $chatWindow.append("<div class='user-container'><strong>" + msg.username + ":</strong> " + msg.data + "</div>");
         updateChatWindow();
     }
 
@@ -51,7 +51,7 @@ $(function() {
     }
 
     window.onbeforeunload = function(e) {
-        addMessageToChat('Bye bye...');
+        addEventToChat('Bye bye...');
 
         msg = {
             type: 'EVENT',
@@ -76,12 +76,17 @@ $(function() {
         msg = JSON.parse(evt.data);
         console.log(msg)
         if (msg.type == "EVENT") {
-            if (msg.event == "SIGN_ON") {
+            if (msg.event == "FIRST_SIGN_ON") {
                 username = msg.username;
-                addEventToChat(username + " signed on");
-                addMessageToChat("Welcome, " + username + " if you would like to change your name type '/nick [username]' into the chat box below.");
+                addEventToChat("Welcome, " + username + " if you would like to change your name type '/nick [username]' into the chat box below.");
+            } else if (msg.event == "SIGN_ON") {
+                addEventToChat(msg.username + " signed on");
+            } else if (msg.event == "SIGN_OFF") {
+                addEventToChat(msg.username + " signed off");
             } else  if (msg.event == "NAME_CHANGED") {
-                username = msg.new_name;
+                if (msg.username == username) {
+                    username = msg.new_name;
+                }
                 addEventToChat(msg.username + " changed name to " + msg.new_name);
             }
         } else if (msg.type == "INFO") {
@@ -93,21 +98,21 @@ $(function() {
                 }
             }
         } else {
-            addMessageToChat(msg.data);
+            addMessageToChat(msg);
         }
     };
 
     ws.onopen = function() {
         msg = {
             type: 'EVENT',
-            event: 'SIGN_ON'
+            event: 'FIRST_SIGN_ON'
         };
 
         ws.send(JSON.stringify(msg));
     };
 
     ws.onclose = function(evt) {
-        addMessageToChat('Connection closed by server: ' + evt.code + ' \"' + evt.reason);
+        addEventToChat('Connection closed by server: ' + evt.code + ' \"' + evt.reason);
     };
 
     function sendMessage() {
@@ -135,6 +140,8 @@ $(function() {
     });
 
     $('#message').keypress(function(e) {
+        unreadCount = 0;
+        updateTitle();
         if (e.which == 13) {
             return sendMessage();
         }
