@@ -9,6 +9,7 @@ Incomplete list of Missing features:
 * No rooms
 * No private messages
 * No cat pictures (this is priority one to be fixed)
+* No SECURITY or any kind, in fact this is laughably hackable. *You should not deploy this to the public internet!*
 
 Installation
 ============
