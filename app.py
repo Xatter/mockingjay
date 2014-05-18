@@ -17,41 +17,47 @@ class MSG_SUB_TYPE:
     OPEN = 'OPEN'
     NAME_CHANGE = 'NAME_CHANGE'
     TEXT = 'TEXT'
-    
+
 
 class ChatWebSocketHandler(WebSocket):
+    room_list = []
     def __init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=None):
         WebSocket.__init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=10)
     
     def opened(self):
         pass
-    
-    def publish_text_msg(self, text):
-        cherrypy.engine.publish('websocket-broadcast', TextMessage(text))
+
+    def send_message(self, msg):
+        cherrypy.engine.publish('websocket-broadcast', TextMessage(json.dumps(msg)))
     
     def received_message(self, m):
-        msg = json.loads(m.data)
-        if msg['msg_type'] == MSG_TYPE.ADMIN:
-            self.handle_admin(msg)
-        elif msg['msg_type'] == MSG_TYPE.MSG:
-            self.handle_msg(msg)
-        else:
-            cherrypy.log("Uknown msg_type received [%s] RAW: %s"% (msg['msg_type'], msg))
-        
-    def handle_admin(self, msg):
-        if msg['msg_sub_type'] == MSG_SUB_TYPE.NAME_CHANGE:
-            self.publish_text_msg(msg['username'] + " Changed his name to: " + msg['data'])
-        elif msg['msg_sub_type'] == MSG_SUB_TYPE.OPEN:
-            self.publish_text_msg(msg['data'] + " Entered Room")
-        else:
-            cherrypy.log("Uknown sub_msg_type received [%s] RAW: %s"% (msg['msg_sub_type'], msg))
+        return_msg = msg = json.loads(m.data)
+        print msg
 
-    def handle_msg(self, msg):
-        if msg['msg_sub_type'] == MSG_SUB_TYPE.TEXT:
-            self.publish_text_msg( msg['username'] + ": " + msg['data'])
-        else:
-            cherrypy.log("Uknown sub_msg_type received [%s] RAW: %s"% (msg['msg_sub_type'], msg))
-       
+        if msg['type'] == "CMD":
+            if msg['command'] == "NAME_CHANGE":
+                self.room_list[self.room_list.index(msg['username'])] =  msg['new_name']
+                self.room_list.sort()
+
+                return_msg = {
+                    "type": "EVENT",
+                    "event": "NAME_CHANGED",
+                    "username": msg['username'],
+                    "new_name": msg['new_name']
+                }
+        elif msg['type'] == "EVENT":
+            if msg['event'] == "SIGN_ON":
+                userid = 'User%d' % (random.randrange(0,100))
+                return_msg = {
+                    "type": 'EVENT',
+                    "event": 'SIGN_ON',
+                    "username": userid
+                }
+                self.room_list.append(userid)
+                self.room_list.sort()
+
+        self.send_message(return_msg)
+
     def closed(self, code, reason="A client left the room without a proper explanation."):
         cherrypy.engine.publish('websocket-broadcast', TextMessage(reason))
 
@@ -67,7 +73,7 @@ class Root(object):
     @cherrypy.expose
     def index(self):
         tmpl = jinja2_env.get_template("views/main.html")
-        return tmpl.render(username="User%d" % (random.randrange(0,101,2)) , port=self.port, host=self.host, scheme=self.scheme)
+        return tmpl.render(port=self.port, host=self.host, scheme=self.scheme)
 
     @cherrypy.expose
     def ws(self):
@@ -108,6 +114,10 @@ if __name__ == '__main__':
         '/styles': {
               'tools.staticdir.on': True,
               'tools.staticdir.dir': 'styles'
-            }
+            },
+        '/scripts': {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': 'scripts'
+        }
         }
     )

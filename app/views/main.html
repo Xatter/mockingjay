@@ -50,107 +50,13 @@
         </div>
       </div>
 
-    <script type='application/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js'></script>
+    <script type='text/javascript' src='scripts/jquery.min.js'></script>
     <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-    <script type='application/javascript'>
-      var username = '{{username}}';
-      $(document).ready(function() {
-        var unreadCount = 0;
-        var $chatWindow = $('#chat');
-
-        websocket = '{{scheme}}://' + location.hostname + ':{{port}}/ws';
-        if (window.WebSocket) {
-          ws = new WebSocket(websocket);
-        }
-        else if (window.MozWebSocket) {
-          ws = MozWebSocket(websocket);
-        }
-        else {
-          console.log('WebSocket Not Supported');
-          return;
-        }
-
-        function addMessageToChat(msg) {
-          // TODO: Move into ChatWindow class, add different categories of messages: info, say, event, etc.
-          $chatWindow.append("<div class='user-container'>" + msg + "</div>");
-          $(window).scrollTop($(window).height());
-
-          // Prevent the window from getting too full and slowing everything down.
-          if ($chatWindow.children().length > 200) {
-            $chatWindow.children()[0].remove();
-          }
-
-          unreadCount++;
-          updateTitle();
-        }
-
-        function updateTitle() {
-          var title = "MockingJay";
-          if (unreadCount > 0) {
-            title += " (" + unreadCount + ")";
-          }
-
-          document.title = title;
-        }
-
-        window.onbeforeunload = function(e) {
-          addMessageToChat('Bye bye...');
-          ws.close(1000, username + ' left the room');
-
-          if(!e) e = window.event;
-          e.stopPropagation();
-          e.preventDefault();
-        };
-
-        window.onmousemove = function(e) {
-          unreadCount = 0;
-          updateTitle();
-        };
-
-        ws.onmessage = function (evt) {
-          addMessageToChat(evt.data);
-        };
-
-        ws.onopen = function() {
-            ws.send(JSON.stringify({username: username, msg_type: "ADMIN", msg_sub_type: "OPEN", data: username}))
-        };
-
-        ws.onclose = function(evt) {
-           addMessageToChat('Connection closed by server: ' + evt.code + ' \"' + evt.reason);
-        };
-
-        function sendMessage() {
-          var $message = $('#message');
-          var value = $message.val();
-
-          // TODO: move this into a parser class
-          if (value[0] == '/') {
-            if(value.substring(0,5) == '/nick') {
-              var newUsername = value.substring(6,value.length);
-              ws.send(JSON.stringify({username: username, msg_type: "ADMIN", msg_sub_type: "NAME_CHANGE", data: newUsername}))
-              username = newUsername;
-              // TODO: save this to local storage as a preference
-            }
-          } else {
-            ws.send(JSON.stringify({username: username, msg_type: "MSG", msg_sub_type: "TEXT", data: value}))
-          }
-
-          $message.val("");
-          return false;
-        }
-
-        $('#send').click(function() {
-          return sendMessage();
-        });
-
-        $('#message').keypress(function(e) {
-          if (e.which == 13) {
-            return sendMessage();
-          }
-        });
-
-        addMessageToChat("Welcome, " + username + " if you would like to change your name type '/nick [username]' into the chat box below.");
-      });
-     </script>
+    <script type='text/javascript'>
+        var username = 'Jim';
+        var port = '{{port}}';
+        var scheme = '{{scheme}}';
+    </script>
+    <script type="text/javascript" src="scripts/main.js"></script>
   </body>
 </html>
