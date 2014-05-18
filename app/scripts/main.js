@@ -31,8 +31,13 @@ $(function() {
     }
 
     function addMessageToChat(msg) {
+        var url_match_str = "\\b(?:(?:https?|ftp|file)://|www\\.|ftp\\.)(?:\\([-A-Z0-9+&@#/%=~_|$?!:,.]*\\)|[-A-Z09+&@#/%=~_|$?!:,.])*(?:\\([-A-Z0-9+&@#/%=~_|$?!:,.]*\\)|[A-Z0-9+&@#/%=~_|$])";
+        var text = msg.data;
+        var re = new RegExp(url_match_str, 'gi');
+        text = text.replace(re, '<a href="$&" target="_blank">$&</a>', 'gi');
+
         // TODO: Move into ChatWindow class, add different categories of messages: info, say, event, etc.
-        $chatWindow.append("<div class='user-container'><strong>" + msg.username + ":</strong> " + msg.data + "</div>");
+        $chatWindow.append("<div class='user-container'><strong>" + msg.username + ":</strong> " + text + "</div>");
         updateChatWindow();
     }
 
