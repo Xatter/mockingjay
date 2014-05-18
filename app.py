@@ -38,44 +38,50 @@ class ChatWebSocketHandler(WebSocket):
         self.broadast_message(room_list_msg)
 
     def received_message(self, m):
-        return_msg = msg = json.loads(m.data)
-        cherrypy.log("Recieved: %s" % msg)
+        try:
+            return_msg = msg = json.loads(m.data)
+            cherrypy.log("Recieved: %s" % msg)
 
-        # eventually this if thing should be a pub/sub or some other event/factory pattern
-        if msg['type'] == "CMD":
-            if msg['command'] == "NAME_CHANGE":
-                self.room_list[self.room_list.index(msg['username'])] =  msg['new_name']
-                self.room_list.sort()
-                self.broadcast_room_list()
+            # eventually this if thing should be a pub/sub or some other event/factory pattern
+            if msg['type'] == "CMD":
+                if msg['command'] == "NAME_CHANGE":
+                    self.room_list[self.room_list.index(msg['username'])] =  msg['new_name']
+                    self.room_list.sort()
+                    self.broadcast_room_list()
 
-                return_msg = {
-                    "type": "EVENT",
-                    "event": "NAME_CHANGED",
-                    "username": msg['username'],
-                    "new_name": msg['new_name']
-                }
-        elif msg['type'] == "EVENT":
-            if msg['event'] == "FIRST_SIGN_ON":
-                userid = 'User%d' % (random.randrange(0,100))
-                if 'username' in msg:
-                    userid = msg['username']
+                    return_msg = {
+                        "type": "EVENT",
+                        "event": "NAME_CHANGED",
+                        "username": msg['username'],
+                        "new_name": msg['new_name']
+                    }
+            elif msg['type'] == "EVENT":
+                if msg['event'] == "FIRST_SIGN_ON":
+                    userid = 'User%d' % (random.randrange(0,100))
+                    if 'username' in msg:
+                        userid = msg['username']
 
-                self.room_list.append(userid)
-                self.room_list.sort()
-                self.broadcast_room_list()
-                msg['username'] = userid
-                self.send(json.dumps(msg), False)
-                return_msg = {
-                    "type": 'EVENT',
-                    "event": 'SIGN_ON',
-                    "username": userid
-                }
-            elif msg['event'] == "SIGN_OFF":
-                self.room_list.remove(msg['username'])
-                self.broadcast_room_list()
-                return
+                    if userid in self.room_list:
+                        userid += str((random.randrange(0,100)))
 
-        self.broadast_message(return_msg)
+                    self.room_list.append(userid)
+                    self.room_list.sort()
+                    self.broadcast_room_list()
+                    msg['username'] = userid
+                    self.send(json.dumps(msg), False)
+                    return_msg = {
+                        "type": 'EVENT',
+                        "event": 'SIGN_ON',
+                        "username": userid
+                    }
+                elif msg['event'] == "SIGN_OFF":
+                    self.room_list.remove(msg['username'])
+                    self.broadcast_room_list()
+                    return
+
+            self.broadast_message(return_msg)
+        except Exception, e:
+            cherrypy.log(str(e), severity=logging.ERROR, traceback=True)
 
     def closed(self, code, reason="A client left the room without a proper explanation."):
         cherrypy.engine.publish('websocket-broadcast', TextMessage(reason))
