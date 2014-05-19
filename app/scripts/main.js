@@ -73,7 +73,7 @@ $(function() {
 
         if (text.indexOf(username) != -1) {
             chime.play();
-            $message.addClass('success'); // one of the built in bootstrap highlight class
+            $message.addClass('highlight'); 
         }
 
         $chatWindow.append($message);
