@@ -38,10 +38,15 @@ $(function() {
 
     function addMessageToChat(msg) {
         var text = msg.data;
-        text = linkify(text);
+        if (text[0] != '!') {
+            text = linkify(text);
+        } else {
+            text = text.substring(1);
+        }
+
 
         // TODO: Move into ChatWindow class, add different categories of messages: info, say, event, etc.
-        var date = new Date();
+        var date = new Date(msg.timestamp);
         var time = date.toLocaleTimeString();
 
         var $message = $('<div class="user-container"><span class="timestamp">['+time+'] </span><span class="username">'+msg.username+': </span><span>' + text +'</span></div>');
@@ -52,7 +57,7 @@ $(function() {
 
         if (text.indexOf(username) != -1) {
             chime.play();
-            $message.addClass('highlight');
+            $message.addClass('success'); // one of the built in bootstrap highlight class
         }
 
         $chatWindow.append($message);
@@ -68,7 +73,7 @@ $(function() {
     function updateTitle() {
         var title = "MockingJay";
         if (unreadCount > 0) {
-            title += " (" + unreadCount + ")";
+            title = "(" + unreadCount + ") " + title;
         }
 
         document.title = title;

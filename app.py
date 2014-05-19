@@ -3,6 +3,7 @@ import argparse
 import random
 import os
 import cherrypy
+import datetime
 
 import json
 
@@ -21,6 +22,7 @@ class ChatWebSocketHandler(WebSocket):
         pass
 
     def broadast_message(self, msg):
+        msg['timestamp'] = datetime.datetime.utcnow().isoformat()
         LAST_MSGS.append(msg)
         if len(LAST_MSGS) > 200: LAST_MSGS.pop(0)
         cherrypy.engine.publish('websocket-broadcast', TextMessage(json.dumps(msg)))
@@ -36,6 +38,7 @@ class ChatWebSocketHandler(WebSocket):
     def received_message(self, m):
         try:
             return_msg = msg = json.loads(m.data)
+
             cherrypy.log("Recieved: %s" % msg)
 
             # eventually this if thing should be a pub/sub or some other event/factory pattern
