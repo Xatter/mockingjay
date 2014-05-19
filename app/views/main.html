@@ -24,8 +24,7 @@
           </div>
           <div class="navbar-collapse collapse" id="navbar-main">
             <ul class="nav navbar-nav">
-              <li>
-                <a href="../help/">Help</a>
+             <li> <a href="../help/">Help</a>
               </li>
             </ul>
 
@@ -43,19 +42,25 @@
         </div>
 
         <div id="input-area">
-          <div class="input-group">
-            <span class="input-group-addon">Say:</span>
-            <input type="text" class="form-control" id="message">
-            <span class="input-group-btn">
-              <button class="btn btn-primary" id="send">Send</button>
-            </span>
-          </div>
-          <div class="input-group">
-            <span class="input-group-addon">Paste Code:</span>
-            <textarea class="form-control" rows="3" id="codeArea"></textarea>
-            <span class="input-group-btn">
-              <button class="btn" id="sendCode">Send Code</button>
-            </span>
+          <div class="row">
+            <div class="col-md-7">
+              <div class="input-group">
+                <span class="input-group-addon">Say:</span>
+                <textarea rows=3 id="message" class="form-control"></textarea>
+                <span class="input-group-btn">
+                  <button class="btn btn-primary" id="send" style="height:80px;">Send</button>
+                </span>
+              </div>
+            </div>
+            <div class="col-md-5">
+              <div class="input-group">
+                <span class="input-group-addon">Code</span>
+                <textarea id="codeArea" rows="3" class="form-control"></textarea>
+                <span class="input-group-btn">
+                  <button class="btn btn-default" id="sendCode" type="button" style="height:80px;">Send Code</button>
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
