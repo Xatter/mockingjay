@@ -44,20 +44,19 @@ $(function() {
         var date = new Date();
         var time = date.toLocaleTimeString();
 
-        if (text.indexOf(username) != -1)
-        {
-            chime.play()
+        var $message = $('<div class="user-container"><span class="timestamp">['+time+'] </span><span class="username">'+msg.username+': </span><span>' + text +'</span></div>');
+
+        if (($chatWindow.children().length % 2) == 1){
+          $message.addClass('uc-odd');
         }
 
-        if (($chatWindow.children().length % 2) == 1)
-        {
-            $chatWindow.append("<div class='user-container' id='uc-odd'><i>[" + time + "] </i><strong>" +  msg.username + ":</strong> " + text + "</div>");    
+        if (text.indexOf(username) != -1) {
+            chime.play();
+            $message.addClass('highlight');
         }
-        else
-        {
-            $chatWindow.append("<div class='user-container' id='uc-even'><i>[" + time + "] </i><strong>" +  msg.username + ":</strong> " + text + "</div>");    
-        }
-        
+
+        $chatWindow.append($message);
+
         updateChatWindow();
     }
 

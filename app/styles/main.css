@@ -11,8 +11,20 @@
 	z-index: 5;
 }
 
-#uc-odd{
+.uc-odd{
 	background-color: #efefef
+}
+
+.username {
+    font-weight: bold;
+}
+
+.highlight {
+    background-color: deepskyblue;
+}
+
+.timestamp {
+  color: gray;
 }
 
 #main {
