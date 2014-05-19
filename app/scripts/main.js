@@ -36,12 +36,17 @@ $(function() {
         updateTitle();
     }
 
+
     function addMessageToChat(msg) {
         var text = msg.data;
-        if (text[0] != '!') {
-            text = linkify(text);
+        if (msg.type == "CODE") {
+            text = '<pre class="prettyprint linenums">' + text + '</pre>';
         } else {
-            text = text.substring(1);
+            if (text[0] != '!') {
+                text = linkify(text);
+            } else {
+                text = text.substring(1);
+            }
         }
 
 
@@ -63,6 +68,9 @@ $(function() {
         $chatWindow.append($message);
 
         updateChatWindow();
+        if (msg.type == "CODE") {
+            prettyPrint();
+        }
     }
 
     function addEventToChat(msg) {
@@ -178,6 +186,16 @@ $(function() {
         if (e.which == 13) {
             return sendMessage();
         }
+    });
+
+    function sendCode() {
+        var code = $('#codeArea').val();
+        ws.send(JSON.stringify({username: username, type: "CODE", data: code}));
+        $('#codeArea').val("");
+    }
+
+    $('#sendCode').click(function() {
+        return sendCode();
     });
 
 });

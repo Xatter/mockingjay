@@ -4,9 +4,11 @@
      <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootswatch/3.1.1/journal/bootstrap.min.css">
      <!-- <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootswatch/3.1.1/readable/bootstrap.min.css"> -->
      <!-- <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootswatch/3.1.1/lumen/bootstrap.min.css"> -->
+     <link rel="stylesheet" href="/styles/prettify.css" type="text/css" media="screen" title="no title" charset="utf-8">
      <link rel="stylesheet" href="/styles/main.css" type="text/css" media="screen" title="no title" charset="utf-8">
      <script type='text/javascript' src='scripts/jquery.min.js'></script>
      <script type='text/javascript' src='scripts/ba-linkify.min.js'></script>
+     <script src="http://cdnjs.cloudflare.com/ajax/libs/prettify/r224/prettify.js" type="text/javascript"></script>
   </head>
   <body>
     <h2>MockingJay</h2>
@@ -45,7 +47,14 @@
             <span class="input-group-addon">Say:</span>
             <input type="text" class="form-control" id="message">
             <span class="input-group-btn">
-              <button class="btn btn-default">Send</button>
+              <button class="btn btn-primary" id="send">Send</button>
+            </span>
+          </div>
+          <div class="input-group">
+            <span class="input-group-addon">Paste Code:</span>
+            <textarea class="form-control" rows="3" id="codeArea"></textarea>
+            <span class="input-group-btn">
+              <button class="btn" id="sendCode">Send Code</button>
             </span>
           </div>
         </div>

@@ -7,7 +7,7 @@
 	background-color: #e0e0e0;
 	padding: 4px 0 4px 0;
 	width: 100%;
-	height: 80px;
+	height: 125px;
 	z-index: 5;
 }
 
@@ -34,7 +34,7 @@
 }
 
 #chat {
-	padding-bottom: 120px;
+	padding-bottom: 150px;
 	background: transparent;
 	position: relative;
 }
