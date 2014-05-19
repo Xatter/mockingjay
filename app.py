@@ -10,14 +10,8 @@ from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
 from ws4py.websocket import WebSocket
 from ws4py.messaging import TextMessage
 
-class MSG_TYPE:
-    ADMIN = 'ADMIN'
-    MSG   = 'MSG'
-    
-class MSG_SUB_TYPE:
-    OPEN = 'OPEN'
-    NAME_CHANGE = 'NAME_CHANGE'
-    TEXT = 'TEXT'
+LAST_MSGS = []
+
 class ChatWebSocketHandler(WebSocket):
     room_list = []
     def __init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=None):
@@ -27,6 +21,8 @@ class ChatWebSocketHandler(WebSocket):
         pass
 
     def broadast_message(self, msg):
+        LAST_MSGS.append(msg)
+        if len(LAST_MSGS) > 200: LAST_MSGS.pop(0)
         cherrypy.engine.publish('websocket-broadcast', TextMessage(json.dumps(msg)))
 
     def broadcast_room_list(self):
@@ -69,6 +65,9 @@ class ChatWebSocketHandler(WebSocket):
                     self.broadcast_room_list()
                     msg['username'] = userid
                     self.send(json.dumps(msg), False)
+                    for last_msg in LAST_MSGS:
+                        self.send(json.dumps(last_msg), False)
+
                     return_msg = {
                         "type": 'EVENT',
                         "event": 'SIGN_ON',
@@ -77,7 +76,11 @@ class ChatWebSocketHandler(WebSocket):
                 elif msg['event'] == "SIGN_OFF":
                     self.room_list.remove(msg['username'])
                     self.broadcast_room_list()
-                    return
+                    return_msg = {
+                        "type": 'EVENT',
+                        "event": 'SIGN_OFF',
+                        "username": msg['username']
+                    }
 
             self.broadast_message(return_msg)
         except Exception, e:
