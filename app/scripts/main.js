@@ -24,6 +24,7 @@ $(function() {
         // Prevent the window from getting too full and slowing everything down.
         if ($chatWindow.children().length > 200) {
             $chatWindow.children()[0].remove();
+            $chatWindow.children()[1].remove(); //We will removed 2 items to preserve odd row highlighting
         }
 
         unreadCount++;
@@ -38,7 +39,15 @@ $(function() {
         var date = new Date();
         var time = date.toLocaleTimeString();
 
-        $chatWindow.append("<div class='user-container'><i>[" + time + "] </i><strong>" +  msg.username + ":</strong> " + text + "</div>");
+        if (($chatWindow.children().length % 2) == 1)
+        {
+            $chatWindow.append("<div class='user-container' id='uc-odd'><i>[" + time + "] </i><strong>" +  msg.username + ":</strong> " + text + "</div>");    
+        }
+        else
+        {
+            $chatWindow.append("<div class='user-container' id='uc-even'><i>[" + time + "] </i><strong>" +  msg.username + ":</strong> " + text + "</div>");    
+        }
+        
         updateChatWindow();
     }
 
