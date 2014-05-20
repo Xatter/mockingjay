@@ -79,21 +79,5 @@
         var scheme = '{{scheme}}';
     </script>
     <script type="text/javascript" src="scripts/main.js"></script>
-    <script type="text/javascript">
-      $(function() {
-        $('#fileupload').fileupload({
-          dataType: 'json',
-          paramName: 'myFile',
-          formData: {username: username},
-          done: function(e, data) {
-            $.each(data.result.files, function (index, file) {
-              $img = $("<img/>");
-              $img.src = file.name;
-              console.log($img);
-            });
-          }
-        })
-      });
-    </script>
   </body>
 </html>

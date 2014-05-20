@@ -138,6 +138,20 @@ $(function() {
                 addEventToChat("<strong>Welcome, " + username + "</strong> if you would like to change your name type '/nick [username]' into the chat box below.");
                 addEventToChat("To share code samples, please paste it in the code box so it will be formatted correctly.");
                 addEventToChat("To share an image or file, simply <strong>drag and drop</strong> it into this window.");
+                // TODO: instead of doing this twice (in the two places where we change username)
+                // Figure out a better way to update the username of the file upload.
+                $('#fileupload').fileupload({
+                  dataType: 'json',
+                  paramName: 'myFile',
+                  formData: {username: username},
+                  done: function(e, data) {
+                    $.each(data.result.files, function (index, file) {
+                      $img = $("<img/>");
+                      $img.src = file.name;
+                      console.log($img);
+                    });
+                  }
+                });
             } else if (msg.event == "SIGN_ON") {
                 addEventToChat(msg.username + " signed on");
             } else if (msg.event == "SIGN_OFF") {
@@ -146,6 +160,18 @@ $(function() {
                 if (msg.username == username) {
                     username = msg.new_name;
                     window.localStorage['username'] = username;
+                    $('#fileupload').fileupload({
+                      dataType: 'json',
+                      paramName: 'myFile',
+                      formData: {username: username},
+                      done: function(e, data) {
+                        $.each(data.result.files, function (index, file) {
+                          $img = $("<img/>");
+                          $img.src = file.name;
+                          console.log($img);
+                        });
+                      }
+                    });
                 }
                 addEventToChat(msg.username + " changed name to " + msg.new_name);
             }
