@@ -4,4 +4,5 @@ venv/
 .DS_Store
 *.swp
 *.iml
+app/tmp/
 

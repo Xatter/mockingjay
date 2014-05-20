@@ -49,16 +49,25 @@ $(function() {
 
     function addMessageToChat(msg) {
         var text = msg.data;
+        // These should be seperate addCodeMessage and addFileMessage calls, but I want the username
+        // associated as well so I want the addMessage logic... needs refactoring.
         if (msg.type == "CODE") {
             text = escapeHtml(text); // for XML
             text = '<pre class="prettyprint linenums">' + text + '</pre>';
-        } else {
+        } else if (msg.type == "FILE") {
+            if (msg.contentType == "image/jpeg") {
+                text = '<img src="' + msg.url + '"/>';
+            } else {
+                text = "<a href='" + msg.url + "' target='_blank'>"+ msg.fileName + "</a>";
+            }
+        }else {
             if (text[0] != '!') {
                 text = linkify(text);
             } else {
                 text = text.substring(1);
             }
         }
+
 
 
         // TODO: Move into ChatWindow class, add different categories of messages: info, say, event, etc.

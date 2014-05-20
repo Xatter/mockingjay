@@ -13,6 +13,12 @@ from ws4py.messaging import TextMessage
 
 LAST_MSGS = []
 
+def broadast_message(msg):
+    msg['timestamp'] = datetime.datetime.utcnow().isoformat()
+    LAST_MSGS.append(msg)
+    if len(LAST_MSGS) > 200: LAST_MSGS.pop(0)
+    cherrypy.engine.publish('websocket-broadcast', TextMessage(json.dumps(msg)))
+
 class ChatWebSocketHandler(WebSocket):
     room_list = []
     def __init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=None):
@@ -21,11 +27,6 @@ class ChatWebSocketHandler(WebSocket):
     def opened(self):
         pass
 
-    def broadast_message(self, msg):
-        msg['timestamp'] = datetime.datetime.utcnow().isoformat()
-        LAST_MSGS.append(msg)
-        if len(LAST_MSGS) > 200: LAST_MSGS.pop(0)
-        cherrypy.engine.publish('websocket-broadcast', TextMessage(json.dumps(msg)))
 
     def broadcast_room_list(self):
         room_list_msg = {
@@ -33,7 +34,8 @@ class ChatWebSocketHandler(WebSocket):
             "info": "ROOM_LIST",
             "data": self.room_list
         }
-        self.broadast_message(room_list_msg)
+
+        broadast_message(room_list_msg)
 
     def received_message(self, m):
         try:
@@ -85,7 +87,7 @@ class ChatWebSocketHandler(WebSocket):
                         "username": msg['username']
                     }
 
-            self.broadast_message(return_msg)
+            broadast_message(return_msg)
         except Exception, e:
             cherrypy.log(str(e), severity=logging.ERROR, traceback=True)
 
@@ -109,6 +111,34 @@ class Root(object):
     @cherrypy.expose
     def ws(self):
         cherrypy.log("Handler created: %s" % repr(cherrypy.request.ws_handler))
+
+    @cherrypy.expose
+    def upload(self, username, myFile):
+        # Although this just counts the file length, it demonstrates
+        # how to read large files in chunks instead of all at once.
+        # CherryPy reads the uploaded file into a temporary file;
+        # myFile.file.read reads from that.
+        # size = 0
+        # while True:
+        #     data = myFile.file.read(8192)
+        #     if not data:
+        #         break
+        #     size += len(data)
+
+        with open("app/tmp/"+myFile.filename, 'w+') as file:
+            file.write(myFile.file.read())
+
+        msg = {
+            'type': 'FILE',
+            'username': username,
+            'url': '/tmp/' + str(myFile.filename),
+            'fileName': str(myFile.filename),
+            'contentType': str(myFile.content_type)
+        }
+
+        broadast_message(msg)
+
+
 
 if __name__ == '__main__':
     import logging
@@ -149,5 +179,13 @@ if __name__ == '__main__':
         '/scripts': {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': 'scripts'
+        },
+        '/images': {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': 'images'
+        },
+        '/tmp': {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': 'tmp'
         }
     })
