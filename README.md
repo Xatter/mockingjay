@@ -9,9 +9,9 @@ As such this chat system has a few interesting features to that end:
 Features
 ========
 * Code formatting and syntax highlighting
-* Simple image sharing by dragging and dropping an image anywhere on the window
+* Simple image sharing by dragging and dropping an image anywhere on the window and it will show up in the chat (screen shots, cat pictures, memes)
 * Simple file sharing of any file, any size, any type by dragging and dropping
-*  Typically log files are too large, or sending binaries to testers is difficult as they get filtered by enterprise mail filters
+  * Typically log files are too large, or sending binaries to testers is difficult as they get filtered by enterprise mail filters
 
 Incomplete list of Missing features:
 ------------------------------------
@@ -20,7 +20,7 @@ Incomplete list of Missing features:
 * No rooms
 * No private messages
 * ~~No cat pictures (this is priority one to be fixed)~~
-* No SECURITY or any kind, in fact this is laughably hackable. *You should not deploy this to the public internet!*
+* No SECURITY of any kind, in fact this is laughably hackable. *You should not deploy this to the public internet!*
 
 Installation
 ============
@@ -34,7 +34,7 @@ Install setuptools first into user local
     $ wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
     $ python ez_setup.py –user
 
-Then Pip:
+Then pip:
 
 	$ curl -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py
 	$ python get-pip.py –user
