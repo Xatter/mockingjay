@@ -55,7 +55,7 @@ $(function() {
             text = escapeHtml(text); // for XML
             text = '<pre class="prettyprint linenums">' + text + '</pre>';
         } else if (msg.type == "FILE") {
-            if (msg.contentType == "image/jpeg") {
+            if (msg.contentType.substring(0,5) == ('image')) {
                 text = '<img src="' + msg.url + '"/>';
             } else {
                 text = "<a href='" + msg.url + "' target='_blank'>"+ msg.fileName + "</a>";
