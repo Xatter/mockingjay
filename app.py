@@ -4,6 +4,8 @@ import random
 import os
 import cherrypy
 import datetime
+import tempfile
+import shutil
 
 import json
 
@@ -125,8 +127,17 @@ class Root(object):
         #         break
         #     size += len(data)
 
-        with open("app/tmp/"+myFile.filename, 'w+') as file:
-            file.write(myFile.file.read())
+        size = 0
+        with tempfile.NamedTemporaryFile(delete=False) as tmp:
+            while True:
+                data = myFile.file.read(1024 * 8)
+                if not data:
+                    break
+                tmp.write(data)
+                size+=len(data)
+
+        target = os.path.join(os.getcwd() + '/app/tmp', myFile.filename)
+        shutil.move(tmp.name, target)
 
         msg = {
             'type': 'FILE',
