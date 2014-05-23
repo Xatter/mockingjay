@@ -101,14 +101,12 @@ jinja2_env = Jinja2Environment(loader=FileSystemLoader('app'))
 
 class Root(object):
     def __init__(self, host, port, ssl=False):
-        self.host = host
-        self.port = port
         self.scheme = 'wss' if ssl else 'ws'
 
     @cherrypy.expose
     def index(self):
         tmpl = jinja2_env.get_template("views/main.html")
-        return tmpl.render(port=self.port, host=self.host, scheme=self.scheme)
+        return tmpl.render(scheme=self.scheme)
 
     @cherrypy.expose
     def ws(self):
@@ -163,7 +161,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     cherrypy.config.update({'server.socket_host': args.host,
-                            'server.socket_port': args.port,
+                            'server.socket_port': int(os.environ.get('PORT', '9000')),
                             'tools.staticdir.root': os.path.abspath(os.path.join(os.path.dirname(__file__), 'static'))})
 
     if args.ssl:

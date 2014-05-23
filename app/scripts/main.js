@@ -4,7 +4,7 @@ $(function() {
     var $roomList = $('#room_list');
     var roomList = [];
 
-    var websocket = scheme + "://" + location.hostname + ":" + port + "/ws";
+    var websocket = scheme + "://" + location.hostname + ":" + location.port + "/ws";
 
     //this bit can probably be moved to html
     var chime = document.createElement('audio');
