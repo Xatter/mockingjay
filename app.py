@@ -57,6 +57,12 @@ class ChatWebSocketHandler(WebSocket):
             return_msg = msg = json.loads(m.data)
             cherrypy.log("Recieved: %s" % msg)
 
+            if msg['type'] != 'CODE':
+                bad_string = '<script'
+                for k in msg:
+                    if bad_string in msg[k]:
+                        return
+
             # eventually this if thing should be a pub/sub or some other event/factory pattern
             if msg['type'] == "CMD":
                 if msg['command'] == "NAME_CHANGE":
