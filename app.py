@@ -23,6 +23,8 @@ def broadast_message(msg):
 
 class ChatWebSocketHandler(WebSocket):
     room_list = []
+    socket_nick_map = {}
+
     def __init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=None):
         WebSocket.__init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=10)
 
@@ -30,6 +32,10 @@ class ChatWebSocketHandler(WebSocket):
         pass
 
     def closed(self, code, reason="A client left the room without a proper explanation."):
+        username = self.socket_nick_map[self]
+        self.room_list.remove(username)
+        del self.socket_nick_map[self]
+
         cherrypy.engine.publish('websocket-broadcast', TextMessage(reason))
 
     def broadcast_room_list(self):
@@ -69,11 +75,14 @@ class ChatWebSocketHandler(WebSocket):
                     if userid in self.room_list:
                         userid += str((random.randrange(0,100)))
 
+                    self.socket_nick_map[self] = userid
+                    msg['username'] = userid
+                    self.send(json.dumps(msg), False)
+
                     self.room_list.append(userid)
                     self.room_list.sort()
                     self.broadcast_room_list()
-                    msg['username'] = userid
-                    self.send(json.dumps(msg), False)
+
                     for last_msg in LAST_MSGS:
                         self.send(json.dumps(last_msg), False)
 
