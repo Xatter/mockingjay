@@ -79,12 +79,13 @@
             console.debug('Socket', 'onclose', _this.connect_string);
           }
           clearTimeout(timeout);
-          _this._ws = null;
           if (_this.clientClosedConnection) {
             return _this.onClose.trigger(e);
           } else {
             if (!reconnectAttempt && !_this.timedOut) {
-              console.debug("Socket", "onclose", _this.connect_string);
+              if (_this.debug) {
+                console.debug("Socket", "onclose", _this.connect_string);
+              }
               _this.onClose.trigger(e);
             }
             return setTimeout(function() {
@@ -119,7 +120,9 @@
     };
 
     Socket.prototype.sendMessage = function(message) {
-      console.debug('Socket', 'sendMessage', this.connect_string, message);
+      if (this.debug) {
+        console.debug('Socket', 'sendMessage', this.connect_string, message);
+      }
       return this._ws.send(JSON.stringify(message));
     };
 

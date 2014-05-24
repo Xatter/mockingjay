@@ -23,7 +23,6 @@ def broadast_message(msg):
 
 class ChatWebSocketHandler(WebSocket):
     room_list = []
-    socket_nick_map = {}
 
     def __init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=None):
         WebSocket.__init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=10)
@@ -32,15 +31,6 @@ class ChatWebSocketHandler(WebSocket):
         pass
 
     def closed(self, code, reason="A client left the room without a proper explanation."):
-        cherrypy.log(str(self.socket_nick_map), severity=logging.ERROR, traceback=True)
-        username = self.socket_nick_map[self]
-
-        # clean up after forced disconnect
-        if (username in self.room_list):
-            self.room_list.remove(username)
-
-        del self.socket_nick_map[self]
-
         cherrypy.engine.publish('websocket-broadcast', TextMessage(reason))
 
     def broadcast_room_list(self):
@@ -85,7 +75,6 @@ class ChatWebSocketHandler(WebSocket):
                     if userid in self.room_list:
                         userid += str((random.randrange(0,100)))
 
-                    self.socket_nick_map[self] = userid
                     msg['username'] = userid
                     self.send(json.dumps(msg), False)
 
@@ -102,7 +91,7 @@ class ChatWebSocketHandler(WebSocket):
                         "username": userid
                     }
                 elif msg['event'] == "SIGN_OFF":
-                    self.room_list.remove(msg['username'])
+                    # self.room_list.remove(msg['username'])
                     self.broadcast_room_list()
                     return_msg = {
                         "type": 'EVENT',

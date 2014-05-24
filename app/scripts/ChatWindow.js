@@ -14,8 +14,7 @@
           msg_obj = new EventMessage('Bye bye...');
           msg = {
             type: 'EVENT',
-            event: 'SIGN_OFF',
-            username: username
+            event: 'SIGN_OFF'
           };
           socket.sendMessage(msg);
           socket.close();

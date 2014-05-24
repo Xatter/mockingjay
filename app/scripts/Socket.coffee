@@ -51,17 +51,16 @@ class @Socket
       console.debug('Socket', 'onclose', @connect_string) if @debug
 
       clearTimeout(timeout)
-      @_ws = null
 
       if @clientClosedConnection
         @onClose.trigger(e)
       else
         if !reconnectAttempt and !@timedOut
-          console.debug "Socket", "onclose", @connect_string
+          console.debug "Socket", "onclose", @connect_string if @debug
           @onClose.trigger(e)
 
         setTimeout( =>
-          @connect true
+          @connect(true)
         , @reconnectInterval)
 
     @_ws.onmessage =  (e) =>
@@ -77,7 +76,7 @@ class @Socket
     @_ws.send(data)
 
   sendMessage: (message) ->
-    console.debug('Socket', 'sendMessage', @connect_string, message)
+    console.debug('Socket', 'sendMessage', @connect_string, message) if @debug
     @_ws.send(JSON.stringify(message))
 
   close: ->

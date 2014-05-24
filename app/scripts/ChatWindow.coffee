@@ -13,7 +13,6 @@ class @ChatWindow
       msg = {
         type: 'EVENT',
         event: 'SIGN_OFF',
-        username: username
       }
 
       socket.sendMessage(msg)
