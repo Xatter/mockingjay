@@ -1,6 +1,4 @@
 $(function () {
-    var unreadCount = 0;
-    var $chatWindow = $('#chat');
     var $roomList = $('#room_list');
     var roomList = [];
 
@@ -22,28 +20,67 @@ $(function () {
     }
 
 
-    function escapeHtml(text) {
-        return text
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
 
+    function ChatWindow() {
+        var unreadCount = 0;
+        var $chatWindow = $('#chat');
+        var that = this;
 
-    function updateChatWindow() {
-        $(window).scrollTop($(window).height());
+        function _updateTitle() {
+            var title = "MockingJay";
+            if (unreadCount > 0) {
+                title = "(" + unreadCount + ") " + title;
+            }
 
-        // Prevent the window from getting too full and slowing everything down.
-        if ($chatWindow.children().length > 200) {
-            $chatWindow.children()[0].remove();
-            $chatWindow.children()[1].remove(); //We will removed 2 items to preserve odd row highlighting
+            document.title = title;
         }
 
-        unreadCount++;
-        updateTitle();
+        function _autoScroll() {
+            $(window).scrollTop($(window).height());
+        }
+
+        this.append = function (msg) {
+            var $msg = msg.say()
+
+            if (($chatWindow.children().length % 2) == 1) {
+                $msg.addClass('uc-odd');
+            }
+
+            if ($msg.val().indexOf(username) != -1) {
+                chime.play();
+                $msg.addClass('highlight');
+            }
+
+            $chatWindow.append($msg);
+            this.update();
+        };
+
+        this.update = function () {
+            _autoScroll();
+
+            // Prevent the window from getting too full and slowing everything down.
+            if ($chatWindow.children().length > 200) {
+                $chatWindow.children()[0].remove();
+                $chatWindow.children()[1].remove(); //We will removed 2 items to preserve odd row highlighting
+            }
+
+            this.unreadCount++;
+            _updateTitle();
+        };
+
+        window.onmousemove = function (e) {
+            this.unreadCount = 0;
+            _updateTitle();
+        };
+
+        $('#message').keypress(function (e) {
+            unreadCount = 0;
+            that.update();
+        });
     }
+
+    var chatWindow = new ChatWindow();
+
 
     function createUserContainer(msg) {
         var date = new Date(msg.timestamp);
@@ -58,8 +95,9 @@ $(function () {
 
     function Message(msg) {
         this.msg = msg;
+        this.type = "MSG"
 
-        this.say = function() {
+        this.say = function () {
             var text = this.msg.data;
 
             if (text[0] != '!') {
@@ -73,44 +111,52 @@ $(function () {
             $text = $('<span></span>').append(text);
             $userContainer.append($text);
 
-            if (($chatWindow.children().length % 2) == 1) {
-                $userContainer.addClass('uc-odd');
-            }
 
-            if (text.indexOf(username) != -1) {
-                chime.play();
-                $userContainer.addClass('highlight');
-            }
-
-            $chatWindow.append($userContainer);
-            updateChatWindow();
+            return $userContainer
         }
     }
 
     function CodeMessage(msg) {
         this.msg = msg;
+        this.type = "CODE";
 
-        this.say = function() {
-            $userContainer = createUserContainer(msg);
+        function _escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        this.say = function () {
+            var $userContainer = createUserContainer(msg);
 
             $code = $("<pre></pre>")
                 .addClass("prettyprint")
                 .addClass("linenums");
 
-            text = escapeHtml(msg.data); // for XML
+            text = _escapeHtml(msg.data); // for XML
             $code.append(text);
             $userContainer.append($code);
 
-            $chatWindow.append($userContainer);
-            updateChatWindow();
-            prettyPrint();
+            return $userContainer;
+        }
+
+
+        this.post_add = prettyPrint();
+
+        this.send = function(code) {
+            ws.send(JSON.stringify({username: username, type: this.type, data: code}));
         }
     }
 
     function FileMessage(msg) {
         this.msg = msg;
-        this.say = function() {
-            $userContainer = createUserContainer(this.msg);
+        this.type = "FILE";
+
+        this.say = function () {
+            var $userContainer = createUserContainer(this.msg);
             if (msg.contentType.substring(0, 5) == ('image')) {
                 text = '<img src="' + this.msg.url + '"/>';
             } else {
@@ -118,28 +164,18 @@ $(function () {
             }
 
             $userContainer.append(text);
-            $chatWindow.append($userContainer);
-            updateChatWindow();
+            return $userContainer;
         }
     }
 
     function EventMessage(msg) {
         this.msg = msg;
 
-        this.say = function() {
-            $chatWindow.append("<div class='user-container event_msg'><i>" + this.msg + "</i></div>");
-            updateChatWindow();
+        this.say = function () {
+            return $("<div class='user-container event_msg'><i>" + this.msg + "</i></div>")
         }
     }
 
-    function updateTitle() {
-        var title = "MockingJay";
-        if (unreadCount > 0) {
-            title = "(" + unreadCount + ") " + title;
-        }
-
-        document.title = title;
-    }
 
     window.onbeforeunload = function (e) {
         msg_obj = new EventMessage('Bye bye...');
@@ -158,10 +194,6 @@ $(function () {
         e.preventDefault();
     };
 
-    window.onmousemove = function (e) {
-        unreadCount = 0;
-        updateTitle();
-    };
 
     ws.onmessage = function (evt) {
         msg = JSON.parse(evt.data);
@@ -169,11 +201,11 @@ $(function () {
             if (msg.event == "FIRST_SIGN_ON") {
                 username = msg.username;
                 msg_obj = new EventMessage("<strong>Welcome, " + username + "</strong> if you would like to change your name type '/nick [username]' into the chat box below.");
-                msg_obj.say();
+                chatWindow.append(msg_obj);
                 msg_obj = new EventMessage("To share code samples, please paste it in the code box so it will be formatted correctly.");
-                msg_obj.say();
+                chatWindow.append(msg_obj);
                 msg_obj = new EventMessage("To share an image or file, simply <strong>drag and drop</strong> it into this window.");
-                msg_obj.say();
+                chatWindow.append(msg_obj);
 
                 // TODO: instead of doing this twice (in the two places where we change username)
                 // Figure out a better way to update the username of the file upload.
@@ -191,10 +223,10 @@ $(function () {
                 });
             } else if (msg.event == "SIGN_ON") {
                 msg_obj = new EventMessage(msg.username + " signed on");
-                msg_obj.say();
+                chatWindow.append(msg_obj);
             } else if (msg.event == "SIGN_OFF") {
                 msg_obj = new EventMessage(msg.username + " signed off");
-                msg_obj.say();
+                chatWindow.append(msg_obj);
             } else if (msg.event == "NAME_CHANGED") {
                 if (msg.username == username) {
                     username = msg.new_name;
@@ -213,7 +245,7 @@ $(function () {
                     });
                 }
                 msg_obj = new EventMessage(msg.username + " changed name to " + msg.new_name);
-                msg_obj.say();
+                chatWindow.append(msg_obj);
             }
         } else if (msg.type == "INFO") {
             if (msg.info == "ROOM_LIST") {
@@ -225,13 +257,13 @@ $(function () {
             }
         } else if (msg.type == "CODE") {
             msg_obj = new CodeMessage(msg);
-            msg_obj.say();
+            chatWindow.append(msg_obj);
         } else if (msg.type == 'FILE') {
             msg_obj = new FileMessage(msg);
-            msg_obj.say();
+            chatWindow.append(msg_obj);
         } else {
             msg_obj = new Message(msg);
-            msg_obj.say();
+            chatWindow.append(msg_obj);
         }
     };
 
@@ -277,21 +309,17 @@ $(function () {
     });
 
     $('#message').keypress(function (e) {
-        unreadCount = 0;
-        updateTitle();
         if (e.which == 13) {
             return sendMessage();
         }
     });
 
-    function sendCode() {
-        var code = $('#codeArea').val();
-        ws.send(JSON.stringify({username: username, type: "CODE", data: code}));
-        $('#codeArea').val("");
-    }
 
     $('#sendCode').click(function () {
-        return sendCode();
+        var code = $('#codeArea').val();
+        msg = new CodeMessage();
+        msg.send(code);
+        $('#codeArea').val("");
     });
 
 });
