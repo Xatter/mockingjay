@@ -14,7 +14,7 @@ class @Socket
   constructor: (@connect_string) ->
     @timeoutInterval = 2000
     @reconnectInterval = 1000
-    @debug = true
+    @debug = false
     @clientClosedConnection = false
 
     @onMessage = new Event

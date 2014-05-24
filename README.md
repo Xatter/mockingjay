@@ -56,3 +56,6 @@ Then run and connect:
 	$ python app.py
 
 Point your browser to http://localhost:9000/
+
+
+[LIVE DEMO](http://mockingjay.herokuapp.com/)

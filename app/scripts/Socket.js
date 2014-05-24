@@ -31,7 +31,7 @@
       this.connect_string = connect_string;
       this.timeoutInterval = 2000;
       this.reconnectInterval = 1000;
-      this.debug = true;
+      this.debug = false;
       this.clientClosedConnection = false;
       this.onMessage = new Event;
       this.onOpen = new Event;
