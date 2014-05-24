@@ -19,181 +19,7 @@ $(function () {
         return;
     }
 
-
-
-    function ChatWindow() {
-        var unreadCount = 0;
-        var $chatWindow = $('#chat');
-        var that = this;
-
-        function _updateTitle() {
-            var title = "MockingJay";
-            if (unreadCount > 0) {
-                title = "(" + unreadCount + ") " + title;
-            }
-
-            document.title = title;
-        }
-
-        function _autoScroll() {
-            $(window).scrollTop($(window).height());
-        }
-
-        this.append = function (msg) {
-            var $msg = msg.say()
-
-            if (($chatWindow.children().length % 2) == 1) {
-                $msg.addClass('uc-odd');
-            }
-
-            if ($msg.val().indexOf(username) != -1) {
-                chime.play();
-                $msg.addClass('highlight');
-            }
-
-            $chatWindow.append($msg);
-            this.update();
-        };
-
-        this.update = function () {
-            _autoScroll();
-
-            // Prevent the window from getting too full and slowing everything down.
-            if ($chatWindow.children().length > 200) {
-                $chatWindow.children()[0].remove();
-                $chatWindow.children()[1].remove(); //We will removed 2 items to preserve odd row highlighting
-            }
-
-            this.unreadCount++;
-            _updateTitle();
-        };
-
-        window.onmousemove = function (e) {
-            this.unreadCount = 0;
-            _updateTitle();
-        };
-
-        $('#message').keypress(function (e) {
-            unreadCount = 0;
-            that.update();
-        });
-    }
-
     var chatWindow = new ChatWindow();
-
-
-    function createUserContainer(msg) {
-        var date = new Date(msg.timestamp);
-        var time = date.toLocaleTimeString();
-        var $userContainer = $('<div></div>').addClass('user-container');
-        var $timestamp = $('<span></span>').addClass('timestamp').append('[' + time + ']');
-        var $userName = $('<span></span>').addClass('username').append(msg.username + ": ");
-        $userContainer.append($timestamp);
-        $userContainer.append($userName);
-        return $userContainer;
-    }
-
-    function Message(msg) {
-        this.msg = msg;
-        this.type = "MSG"
-
-        this.say = function () {
-            var text = this.msg.data;
-
-            if (text[0] != '!') {
-                text = linkify(text);
-            } else {
-                text = text.substring(1);
-            }
-
-            // TODO: Move into ChatWindow class, add different categories of messages: info, say, event, etc.
-            var $userContainer = createUserContainer(this.msg);
-            $text = $('<span></span>').append(text);
-            $userContainer.append($text);
-
-
-            return $userContainer
-        }
-    }
-
-    function CodeMessage(msg) {
-        this.msg = msg;
-        this.type = "CODE";
-
-        function _escapeHtml(text) {
-            return text
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
-
-        this.say = function () {
-            var $userContainer = createUserContainer(msg);
-
-            $code = $("<pre></pre>")
-                .addClass("prettyprint")
-                .addClass("linenums");
-
-            text = _escapeHtml(msg.data); // for XML
-            $code.append(text);
-            $userContainer.append($code);
-
-            return $userContainer;
-        }
-
-
-        this.post_add = prettyPrint();
-
-        this.send = function(code) {
-            ws.send(JSON.stringify({username: username, type: this.type, data: code}));
-        }
-    }
-
-    function FileMessage(msg) {
-        this.msg = msg;
-        this.type = "FILE";
-
-        this.say = function () {
-            var $userContainer = createUserContainer(this.msg);
-            if (msg.contentType.substring(0, 5) == ('image')) {
-                text = '<img src="' + this.msg.url + '"/>';
-            } else {
-                text = "<a href='" + this.msg.url + "' target='_blank'>" + this.msg.fileName + "</a>";
-            }
-
-            $userContainer.append(text);
-            return $userContainer;
-        }
-    }
-
-    function EventMessage(msg) {
-        this.msg = msg;
-
-        this.say = function () {
-            return $("<div class='user-container event_msg'><i>" + this.msg + "</i></div>")
-        }
-    }
-
-
-    window.onbeforeunload = function (e) {
-        msg_obj = new EventMessage('Bye bye...');
-
-        msg = {
-            type: 'EVENT',
-            event: 'SIGN_OFF',
-            username: username
-        }
-
-        ws.send(JSON.stringify(msg));
-        ws.close(1000, username + " left the chat..");
-
-        if (!e) e = window.event;
-        e.stopPropagation();
-        e.preventDefault();
-    };
-
 
     ws.onmessage = function (evt) {
         msg = JSON.parse(evt.data);
@@ -297,7 +123,9 @@ $(function () {
                 // TODO: save this to local storage as a preference
             }
         } else {
-            ws.send(JSON.stringify({username: username, type: "MSG", data: value}))
+            msg = new Message();
+            msg.send(value);
+//            msg.send(JSON.stringify({username: username, type: "MSG", data: value}))
         }
 
         $message.val("");
@@ -313,7 +141,6 @@ $(function () {
             return sendMessage();
         }
     });
-
 
     $('#sendCode').click(function () {
         var code = $('#codeArea').val();
