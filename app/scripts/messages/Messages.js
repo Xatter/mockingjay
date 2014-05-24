@@ -5,13 +5,16 @@
 
   this.Message = (function() {
     function Message(msg, type) {
+      var _ref;
       this.msg = msg;
       this.type = type != null ? type : "MSG";
+      this.username = username;
+      this.text = ((_ref = this.msg) != null ? _ref.data : void 0) || "";
     }
 
     Message.prototype._createUserContainer = function() {
       var $timestamp, $userContainer, $userName, date, time;
-      date = new Date(msg.timestamp);
+      date = new Date(this.msg.timestamp);
       time = date.toLocaleTimeString();
       $userContainer = $('<div></div>').addClass('user-container');
       $timestamp = $('<span></span>').addClass('timestamp').append('[' + time + ']');
@@ -20,7 +23,7 @@
       return $userContainer.append($userName);
     };
 
-    Message.prototype.say = function() {
+    Message.prototype.as_html = function() {
       var $text, $userContainer, text;
       text = this.msg.data;
       if (text[0] !== '!') {
@@ -33,15 +36,7 @@
       return $userContainer.append($text);
     };
 
-    Message.prototype.post_say = function() {};
-
-    Message.prototype.send = function(data) {
-      return ws.send(JSON.stringify({
-        username: username,
-        type: this.type,
-        data: data
-      }));
-    };
+    Message.prototype.post_as_html = function() {};
 
     return Message;
 
@@ -55,7 +50,7 @@
       EventMessage.__super__.constructor.call(this, this.msg, "EVENT");
     }
 
-    EventMessage.prototype.say = function() {
+    EventMessage.prototype.as_html = function() {
       return $("<div class='user-container event_msg'><i>" + this.msg + "</i></div>");
     };
 
@@ -75,7 +70,7 @@
       return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     };
 
-    CodeMessage.prototype.say = function() {
+    CodeMessage.prototype.as_html = function() {
       var $code, $userContainer, text;
       $userContainer = this._createUserContainer();
       $code = $("<pre></pre>").addClass("prettyprint").addClass("linenums");
@@ -84,7 +79,7 @@
       return $userContainer.append($code);
     };
 
-    CodeMessage.prototype.post_say = function() {
+    CodeMessage.prototype.post_as_html = function() {
       return prettyPrint();
     };
 
@@ -100,7 +95,7 @@
       FileMessage.__super__.constructor.call(this, this.msg, "FILE");
     }
 
-    FileMessage.prototype.say = function() {
+    FileMessage.prototype.as_html = function() {
       var $userContainer, text;
       $userContainer = this._createUserContainer();
       if (this.msg.contentType.substring(0, 5) === 'image') {

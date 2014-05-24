@@ -1,8 +1,10 @@
 class @Message
   constructor: (@msg, @type="MSG") ->
+    @username = username
+    @text = @msg?.data or ""
 
   _createUserContainer: ->
-    date = new Date(msg.timestamp);
+    date = new Date(@msg.timestamp);
     time = date.toLocaleTimeString();
     $userContainer = $('<div></div>').addClass('user-container')
     $timestamp = $('<span></span>').addClass('timestamp').append('[' + time + ']')
@@ -10,7 +12,7 @@ class @Message
     $userContainer.append($timestamp)
     $userContainer.append($userName)
 
-  say: ->
+  as_html: ->
     text = @msg.data;
 
     if text[0] != '!'
@@ -22,17 +24,13 @@ class @Message
     $text = $('<span></span>').append(text);
     $userContainer.append($text);
 
-  post_say: ->
-
-  send: (data) ->
-    ws.send(JSON.stringify({username: username, type: @type, data: data}));
-
+  post_as_html: ->
 
 class @EventMessage extends Message
   constructor: (@msg) ->
     super(@msg, "EVENT")
 
-  say: ->
+  as_html: ->
     $("<div class='user-container event_msg'><i>" + @msg + "</i></div>")
 
 
@@ -47,7 +45,7 @@ class @CodeMessage extends Message
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
 
-  say: ->
+  as_html: ->
     $userContainer = @_createUserContainer()
 
     $code = $("<pre></pre>")
@@ -58,7 +56,7 @@ class @CodeMessage extends Message
     $code.append(text)
     $userContainer.append($code)
 
-  post_say: ->
+  post_as_html: ->
     prettyPrint()
 
 
@@ -66,7 +64,7 @@ class @FileMessage extends Message
   constructor: (@msg) ->
     super(@msg, "FILE")
 
-  say: ->
+  as_html: ->
     $userContainer = @_createUserContainer();
     if @msg.contentType.substring(0, 5) == ('image')
       text = '<img src="' + this.msg.url + '"/>';
