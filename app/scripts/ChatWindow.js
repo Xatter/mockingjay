@@ -4,11 +4,6 @@
     function ChatWindow() {
       this.unreadCount = 0;
       this.$chatWindow = $('#chat');
-      window.onmousemove = (function(_this) {
-        return function(e) {
-          return _this._resetUnreadCount();
-        };
-      })(this);
       window.onbeforeunload = function(e) {
         var msg, msg_obj;
         msg_obj = new EventMessage('Bye bye...');
@@ -25,10 +20,14 @@
         e.stopPropagation();
         return e.preventDefault();
       };
+      window.onmousemove = (function(_this) {
+        return function(e) {
+          return _this._resetUnreadCount();
+        };
+      })(this);
       $('#message').keypress((function(_this) {
         return function(e) {
-          _this.unreadCount = 0;
-          return _this.update();
+          return _this._resetUnreadCount();
         };
       })(this));
     }
@@ -52,16 +51,20 @@
     };
 
     ChatWindow.prototype.update = function() {
+      this._updateTitle();
       this._autoScroll();
       if (this.$chatWindow.children().length > 200) {
         this.$chatWindow.children()[0].remove();
-        this.$chatWindow.children()[1].remove();
+        return this.$chatWindow.children()[1].remove();
       }
-      return this._resetUnreadCount();
     };
 
     ChatWindow.prototype.append = function(msg) {
       var $msg;
+      if (!msg) {
+        return;
+      }
+      this.unreadCount++;
       $msg = msg.say();
       if ((this.$chatWindow.children().length % 2) === 1) {
         $msg.addClass('uc-odd');

@@ -23,55 +23,28 @@ $(function () {
 
     ws.onmessage = function (evt) {
         msg = JSON.parse(evt.data);
+        console.log(msg);
         if (msg.type == "EVENT") {
             if (msg.event == "FIRST_SIGN_ON") {
                 username = msg.username;
+
                 msg_obj = new EventMessage("<strong>Welcome, " + username + "</strong> if you would like to change your name type '/nick [username]' into the chat box below.");
                 chatWindow.append(msg_obj);
                 msg_obj = new EventMessage("To share code samples, please paste it in the code box so it will be formatted correctly.");
                 chatWindow.append(msg_obj);
                 msg_obj = new EventMessage("To share an image or file, simply <strong>drag and drop</strong> it into this window.");
                 chatWindow.append(msg_obj);
-
-                // TODO: instead of doing this twice (in the two places where we change username)
-                // Figure out a better way to update the username of the file upload.
-                $('#fileupload').fileupload({
-                    dataType: 'json',
-                    paramName: 'myFile',
-                    formData: {username: username},
-                    done: function (e, data) {
-                        $.each(data.result.files, function (index, file) {
-                            $img = $("<img/>");
-                            $img.src = file.name;
-                            console.log($img);
-                        });
-                    }
-                });
+                return false; //handled
             } else if (msg.event == "SIGN_ON") {
                 msg_obj = new EventMessage(msg.username + " signed on");
-                chatWindow.append(msg_obj);
             } else if (msg.event == "SIGN_OFF") {
                 msg_obj = new EventMessage(msg.username + " signed off");
-                chatWindow.append(msg_obj);
             } else if (msg.event == "NAME_CHANGED") {
                 if (msg.username == username) {
                     username = msg.new_name;
                     window.localStorage['username'] = username;
-                    $('#fileupload').fileupload({
-                        dataType: 'json',
-                        paramName: 'myFile',
-                        formData: {username: username},
-                        done: function (e, data) {
-                            $.each(data.result.files, function (index, file) {
-                                $img = $("<img/>");
-                                $img.src = file.name;
-                                console.log($img);
-                            });
-                        }
-                    });
                 }
                 msg_obj = new EventMessage(msg.username + " changed name to " + msg.new_name);
-                chatWindow.append(msg_obj);
             }
         } else if (msg.type == "INFO") {
             if (msg.info == "ROOM_LIST") {
@@ -81,16 +54,16 @@ $(function () {
                     $roomList.append("<div>" + roomList[i] + "</div>");
                 }
             }
+            return false; //handled
         } else if (msg.type == "CODE") {
             msg_obj = new CodeMessage(msg);
-            chatWindow.append(msg_obj);
         } else if (msg.type == 'FILE') {
             msg_obj = new FileMessage(msg);
-            chatWindow.append(msg_obj);
         } else {
             msg_obj = new Message(msg);
-            chatWindow.append(msg_obj);
         }
+
+        chatWindow.append(msg_obj);
     };
 
     ws.onopen = function (event) {
@@ -119,17 +92,16 @@ $(function () {
         if (value[0] == '/') {
             if (value.substring(0, 5) == '/nick') {
                 var newUsername = value.substring(6, value.length);
+
                 ws.send(JSON.stringify({username: username, type: "CMD", command: "NAME_CHANGE", new_name: newUsername}))
                 // TODO: save this to local storage as a preference
             }
         } else {
             msg = new Message();
             msg.send(value);
-//            msg.send(JSON.stringify({username: username, type: "MSG", data: value}))
         }
 
         $message.val("");
-        return false;
     }
 
     $('#send').click(function () {
@@ -138,6 +110,7 @@ $(function () {
 
     $('#message').keypress(function (e) {
         if (e.which == 13) {
+            e.preventDefault();
             return sendMessage();
         }
     });
@@ -149,4 +122,29 @@ $(function () {
         $('#codeArea').val("");
     });
 
+    $('#fileupload').fileupload({
+        dataType: 'json',
+        paramName: 'myFile',
+        done: function (e, data) {
+            $.each(data.result.files, function (index, file) {
+                $img = $("<img/>");
+                $img.src = file.name;
+                console.log($img);
+            });
+        },
+        add: function (e, data) {
+            data.formData = {username: username};
+
+            if (e.isDefaultPrevented()) {
+                return false;
+            }
+            if (data.autoUpload || (data.autoUpload !== false &&
+                $(this).fileupload('option', 'autoUpload'))) {
+                data.process().done(function () {
+                    data.submit();
+                });
+            }
+
+        }
+    });
 });

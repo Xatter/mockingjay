@@ -75,3 +75,6 @@ class @FileMessage extends Message
 
     $userContainer.append(text);
 
+class @CommandMessage extends Message
+  constructor: (@msg) ->
+    super(@msg, "CMD")

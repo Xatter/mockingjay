@@ -3,9 +3,6 @@ class @ChatWindow
     @unreadCount = 0;
     @$chatWindow = $('#chat');
 
-    window.onmousemove = (e) =>
-      @_resetUnreadCount()
-
     window.onbeforeunload = (e) ->
       msg_obj = new EventMessage('Bye bye...')
 
@@ -23,9 +20,12 @@ class @ChatWindow
       e.stopPropagation()
       e.preventDefault()
 
+    window.onmousemove = (e) =>
+      @_resetUnreadCount()
+
     $('#message').keypress (e) =>
-      @unreadCount = 0;
-      @update();
+      @_resetUnreadCount()
+
 
   _resetUnreadCount: ->
     @unreadCount = 0
@@ -43,6 +43,7 @@ class @ChatWindow
     $(window).scrollTop($(window).height())
 
   update: ->
+    @_updateTitle()
     @_autoScroll()
 
     # Prevent the window from getting too full and slowing everything down.
@@ -50,9 +51,12 @@ class @ChatWindow
       @$chatWindow.children()[0].remove();
       @$chatWindow.children()[1].remove(); # We will removed 2 items to preserve odd row highlighting
 
-    @_resetUnreadCount()
-
   append: (msg) ->
+    if !msg
+      return
+
+    @unreadCount++
+
     $msg = msg.say()
 
     if (@$chatWindow.children().length % 2) == 1

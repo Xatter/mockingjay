@@ -115,4 +115,16 @@
 
   })(Message);
 
+  this.CommandMessage = (function(_super) {
+    __extends(CommandMessage, _super);
+
+    function CommandMessage(msg) {
+      this.msg = msg;
+      CommandMessage.__super__.constructor.call(this, this.msg, "CMD");
+    }
+
+    return CommandMessage;
+
+  })(Message);
+
 }).call(this);
