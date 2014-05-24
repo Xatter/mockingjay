@@ -32,8 +32,13 @@ class ChatWebSocketHandler(WebSocket):
         pass
 
     def closed(self, code, reason="A client left the room without a proper explanation."):
+        cherrypy.log(str(self.socket_nick_map), severity=logging.ERROR, traceback=True)
         username = self.socket_nick_map[self]
-        self.room_list.remove(username)
+
+        # clean up after forced disconnect
+        if (username in self.room_list):
+            self.room_list.remove(username)
+
         del self.socket_nick_map[self]
 
         cherrypy.engine.publish('websocket-broadcast', TextMessage(reason))
@@ -50,7 +55,6 @@ class ChatWebSocketHandler(WebSocket):
     def received_message(self, m):
         try:
             return_msg = msg = json.loads(m.data)
-
             cherrypy.log("Recieved: %s" % msg)
 
             # eventually this if thing should be a pub/sub or some other event/factory pattern

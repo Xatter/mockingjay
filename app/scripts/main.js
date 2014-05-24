@@ -1,4 +1,4 @@
-$(function() {
+$(function () {
     var unreadCount = 0;
     var $chatWindow = $('#chat');
     var $roomList = $('#room_list');
@@ -14,22 +14,21 @@ $(function() {
 
     if (window.WebSocket) {
         ws = new ReconnectingWebSocket(websocket);
-    }
-    else if (window.MozWebSocket) {
+    } else if (window.MozWebSocket) {
         ws = MozWebSocket(websocket);
-    }
-    else {
+    } else {
         console.log('WebSocket Not Supported');
         return;
     }
 
+
     function escapeHtml(text) {
-      return text
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;")
-          .replace(/'/g, "&#039;");
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     }
 
 
@@ -46,54 +45,91 @@ $(function() {
         updateTitle();
     }
 
+    function createUserContainer(msg) {
+        var date = new Date(msg.timestamp);
+        var time = date.toLocaleTimeString();
+        var $userContainer = $('<div></div>').addClass('user-container');
+        var $timestamp = $('<span></span>').addClass('timestamp').append('[' + time + ']');
+        var $userName = $('<span></span>').addClass('username').append(msg.username + ": ");
+        $userContainer.append($timestamp);
+        $userContainer.append($userName);
+        return $userContainer;
+    }
 
-    function addMessageToChat(msg) {
-        var text = msg.data;
-        // These should be seperate addCodeMessage and addFileMessage calls, but I want the username
-        // associated as well so I want the addMessage logic... needs refactoring.
-        if (msg.type == "CODE") {
-            text = escapeHtml(text); // for XML
-            text = '<pre class="prettyprint linenums">' + text + '</pre>';
-        } else if (msg.type == "FILE") {
-            if (msg.contentType.substring(0,5) == ('image')) {
-                text = '<img src="' + msg.url + '"/>';
-            } else {
-                text = "<a href='" + msg.url + "' target='_blank'>"+ msg.fileName + "</a>";
-            }
-        } else {
+    function Message(msg) {
+        this.msg = msg;
+
+        this.say = function() {
+            var text = this.msg.data;
+
             if (text[0] != '!') {
                 text = linkify(text);
             } else {
                 text = text.substring(1);
             }
+
+            // TODO: Move into ChatWindow class, add different categories of messages: info, say, event, etc.
+            var $userContainer = createUserContainer(this.msg);
+            $text = $('<span></span>').append(text);
+            $userContainer.append($text);
+
+            if (($chatWindow.children().length % 2) == 1) {
+                $userContainer.addClass('uc-odd');
+            }
+
+            if (text.indexOf(username) != -1) {
+                chime.play();
+                $userContainer.addClass('highlight');
+            }
+
+            $chatWindow.append($userContainer);
+            updateChatWindow();
         }
+    }
 
-        // TODO: Move into ChatWindow class, add different categories of messages: info, say, event, etc.
-        var date = new Date(msg.timestamp);
-        var time = date.toLocaleTimeString();
+    function CodeMessage(msg) {
+        this.msg = msg;
 
-        var $message = $('<div class="user-container"><span class="timestamp">['+time+'] </span><span class="username">'+msg.username+': </span><span>' + text +'</span></div>');
+        this.say = function() {
+            $userContainer = createUserContainer(msg);
 
-        if (($chatWindow.children().length % 2) == 1){
-          $message.addClass('uc-odd');
-        }
+            $code = $("<pre></pre>")
+                .addClass("prettyprint")
+                .addClass("linenums");
 
-        if (text.indexOf(username) != -1) {
-            chime.play();
-            $message.addClass('highlight'); 
-        }
+            text = escapeHtml(msg.data); // for XML
+            $code.append(text);
+            $userContainer.append($code);
 
-        $chatWindow.append($message);
-
-        updateChatWindow();
-        if (msg.type == "CODE") {
+            $chatWindow.append($userContainer);
+            updateChatWindow();
             prettyPrint();
         }
     }
 
-    function addEventToChat(msg) {
-        $chatWindow.append("<div class='user-container event_msg'><i>" + msg + "</i></div>");
-        updateChatWindow();
+    function FileMessage(msg) {
+        this.msg = msg;
+        this.say = function() {
+            $userContainer = createUserContainer(this.msg);
+            if (msg.contentType.substring(0, 5) == ('image')) {
+                text = '<img src="' + this.msg.url + '"/>';
+            } else {
+                text = "<a href='" + this.msg.url + "' target='_blank'>" + this.msg.fileName + "</a>";
+            }
+
+            $userContainer.append(text);
+            $chatWindow.append($userContainer);
+            updateChatWindow();
+        }
+    }
+
+    function EventMessage(msg) {
+        this.msg = msg;
+
+        this.say = function() {
+            $chatWindow.append("<div class='user-container event_msg'><i>" + this.msg + "</i></div>");
+            updateChatWindow();
+        }
     }
 
     function updateTitle() {
@@ -105,8 +141,8 @@ $(function() {
         document.title = title;
     }
 
-    window.onbeforeunload = function(e) {
-        addEventToChat('Bye bye...');
+    window.onbeforeunload = function (e) {
+        msg_obj = new EventMessage('Bye bye...');
 
         msg = {
             type: 'EVENT',
@@ -117,76 +153,90 @@ $(function() {
         ws.send(JSON.stringify(msg));
         ws.close(1000, username + " left the chat..");
 
-        if(!e) e = window.event;
+        if (!e) e = window.event;
         e.stopPropagation();
         e.preventDefault();
     };
 
-    window.onmousemove = function(e) {
+    window.onmousemove = function (e) {
         unreadCount = 0;
         updateTitle();
     };
 
     ws.onmessage = function (evt) {
         msg = JSON.parse(evt.data);
-        console.log(msg)
         if (msg.type == "EVENT") {
             if (msg.event == "FIRST_SIGN_ON") {
                 username = msg.username;
-                addEventToChat("<strong>Welcome, " + username + "</strong> if you would like to change your name type '/nick [username]' into the chat box below.");
-                addEventToChat("To share code samples, please paste it in the code box so it will be formatted correctly.");
-                addEventToChat("To share an image or file, simply <strong>drag and drop</strong> it into this window.");
+                msg_obj = new EventMessage("<strong>Welcome, " + username + "</strong> if you would like to change your name type '/nick [username]' into the chat box below.");
+                msg_obj.say();
+                msg_obj = new EventMessage("To share code samples, please paste it in the code box so it will be formatted correctly.");
+                msg_obj.say();
+                msg_obj = new EventMessage("To share an image or file, simply <strong>drag and drop</strong> it into this window.");
+                msg_obj.say();
+
                 // TODO: instead of doing this twice (in the two places where we change username)
                 // Figure out a better way to update the username of the file upload.
                 $('#fileupload').fileupload({
-                  dataType: 'json',
-                  paramName: 'myFile',
-                  formData: {username: username},
-                  done: function(e, data) {
-                    $.each(data.result.files, function (index, file) {
-                      $img = $("<img/>");
-                      $img.src = file.name;
-                      console.log($img);
-                    });
-                  }
+                    dataType: 'json',
+                    paramName: 'myFile',
+                    formData: {username: username},
+                    done: function (e, data) {
+                        $.each(data.result.files, function (index, file) {
+                            $img = $("<img/>");
+                            $img.src = file.name;
+                            console.log($img);
+                        });
+                    }
                 });
             } else if (msg.event == "SIGN_ON") {
-                addEventToChat(msg.username + " signed on");
+                msg_obj = new EventMessage(msg.username + " signed on");
+                msg_obj.say();
             } else if (msg.event == "SIGN_OFF") {
-                addEventToChat(msg.username + " signed off");
-            } else  if (msg.event == "NAME_CHANGED") {
+                msg_obj = new EventMessage(msg.username + " signed off");
+                msg_obj.say();
+            } else if (msg.event == "NAME_CHANGED") {
                 if (msg.username == username) {
                     username = msg.new_name;
                     window.localStorage['username'] = username;
                     $('#fileupload').fileupload({
-                      dataType: 'json',
-                      paramName: 'myFile',
-                      formData: {username: username},
-                      done: function(e, data) {
-                        $.each(data.result.files, function (index, file) {
-                          $img = $("<img/>");
-                          $img.src = file.name;
-                          console.log($img);
-                        });
-                      }
+                        dataType: 'json',
+                        paramName: 'myFile',
+                        formData: {username: username},
+                        done: function (e, data) {
+                            $.each(data.result.files, function (index, file) {
+                                $img = $("<img/>");
+                                $img.src = file.name;
+                                console.log($img);
+                            });
+                        }
                     });
                 }
-                addEventToChat(msg.username + " changed name to " + msg.new_name);
+                msg_obj = new EventMessage(msg.username + " changed name to " + msg.new_name);
+                msg_obj.say();
             }
         } else if (msg.type == "INFO") {
             if (msg.info == "ROOM_LIST") {
                 roomList = msg.data
                 $roomList.empty()
-                for(var i = 0;i<roomList.length;i++) {
-                    $roomList.append("<div>"+ roomList[i] + "</div>");
+                for (var i = 0; i < roomList.length; i++) {
+                    $roomList.append("<div>" + roomList[i] + "</div>");
                 }
             }
+        } else if (msg.type == "CODE") {
+            msg_obj = new CodeMessage(msg);
+            msg_obj.say();
+        } else if (msg.type == 'FILE') {
+            msg_obj = new FileMessage(msg);
+            msg_obj.say();
         } else {
-            addMessageToChat(msg);
+            msg_obj = new Message(msg);
+            msg_obj.say();
         }
     };
 
-    ws.onopen = function() {
+    ws.onopen = function (event) {
+        console.log(event)
         msg = {
             type: 'EVENT',
             event: 'FIRST_SIGN_ON'
@@ -199,8 +249,8 @@ $(function() {
         ws.send(JSON.stringify(msg));
     };
 
-    ws.onclose = function(evt) {
-        addEventToChat('Connection closed by server: ' + evt.code + ' \"' + evt.reason);
+    ws.onclose = function (evt) {
+        msg_obj = new EventMessage('Connection closed by server: ' + evt.code + ' \"' + evt.reason);
     };
 
     function sendMessage() {
@@ -209,8 +259,8 @@ $(function() {
 
         // TODO: move this into a parser class
         if (value[0] == '/') {
-            if(value.substring(0,5) == '/nick') {
-                var newUsername = value.substring(6,value.length);
+            if (value.substring(0, 5) == '/nick') {
+                var newUsername = value.substring(6, value.length);
                 ws.send(JSON.stringify({username: username, type: "CMD", command: "NAME_CHANGE", new_name: newUsername}))
                 // TODO: save this to local storage as a preference
             }
@@ -222,11 +272,11 @@ $(function() {
         return false;
     }
 
-    $('#send').click(function() {
+    $('#send').click(function () {
         return sendMessage();
     });
 
-    $('#message').keypress(function(e) {
+    $('#message').keypress(function (e) {
         unreadCount = 0;
         updateTitle();
         if (e.which == 13) {
@@ -240,7 +290,7 @@ $(function() {
         $('#codeArea').val("");
     }
 
-    $('#sendCode').click(function() {
+    $('#sendCode').click(function () {
         return sendCode();
     });
 
