@@ -60,15 +60,13 @@ $(function() {
             } else {
                 text = "<a href='" + msg.url + "' target='_blank'>"+ msg.fileName + "</a>";
             }
-        }else {
+        } else {
             if (text[0] != '!') {
                 text = linkify(text);
             } else {
                 text = text.substring(1);
             }
         }
-
-
 
         // TODO: Move into ChatWindow class, add different categories of messages: info, say, event, etc.
         var date = new Date(msg.timestamp);

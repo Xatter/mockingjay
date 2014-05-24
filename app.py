@@ -24,11 +24,13 @@ def broadast_message(msg):
 class ChatWebSocketHandler(WebSocket):
     room_list = []
     def __init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=None):
-        WebSocket.__init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=10)
-    
+        WebSocket.__init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=5)
+
     def opened(self):
         pass
 
+    def closed(self, code, reason="A client left the room without a proper explanation."):
+        cherrypy.engine.publish('websocket-broadcast', TextMessage(reason))
 
     def broadcast_room_list(self):
         room_list_msg = {
@@ -93,8 +95,6 @@ class ChatWebSocketHandler(WebSocket):
         except Exception, e:
             cherrypy.log(str(e), severity=logging.ERROR, traceback=True)
 
-    def closed(self, code, reason="A client left the room without a proper explanation."):
-        cherrypy.engine.publish('websocket-broadcast', TextMessage(reason))
 
 from jinja2 import Environment as Jinja2Environment, FileSystemLoader
 jinja2_env = Jinja2Environment(loader=FileSystemLoader('app'))
