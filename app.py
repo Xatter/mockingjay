@@ -24,7 +24,7 @@ def broadast_message(msg):
 class ChatWebSocketHandler(WebSocket):
     room_list = []
     def __init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=None):
-        WebSocket.__init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=5)
+        WebSocket.__init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=10)
 
     def opened(self):
         pass
