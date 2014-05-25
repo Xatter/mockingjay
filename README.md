@@ -58,4 +58,4 @@ Then run and connect:
 Point your browser to http://localhost:9000/
 
 
-[LIVE DEMO](http://mockingjay.herokuapp.com/)
+[LIVE DEMO](http://chat.extroverteddeveloper.com/)
