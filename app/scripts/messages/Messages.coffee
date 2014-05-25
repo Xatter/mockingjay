@@ -76,3 +76,7 @@ class @FileMessage extends Message
 class @CommandMessage extends Message
   constructor: (@msg) ->
     super(@msg, "CMD")
+
+class @InfoMessage extends Message
+  constructor: (@msg) ->
+    super(@msg, "INFO")

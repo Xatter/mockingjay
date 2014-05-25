@@ -12,10 +12,8 @@
         return function(e) {
           var msg, msg_obj;
           msg_obj = new EventMessage('Bye bye...');
-          msg = {
-            type: 'EVENT',
-            event: 'SIGN_OFF'
-          };
+          msg = new EventMessage();
+          msg.event = "SIGN_OFF";
           socket.sendMessage(msg);
           socket.close();
           if (!e) {

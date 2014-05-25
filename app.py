@@ -23,15 +23,20 @@ def broadast_message(msg):
 
 class ChatWebSocketHandler(WebSocket):
     room_list = []
+    socket_user_map = {}
 
     def __init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=None):
         WebSocket.__init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=10)
 
     def opened(self):
-        pass
+        self.socket_user_map[self] = None
 
     def closed(self, code, reason="A client left the room without a proper explanation."):
         cherrypy.engine.publish('websocket-broadcast', TextMessage(reason))
+        username = self.socket_user_map[self]
+        del self.socket_user_map[self]
+        if username in self.room_list:
+            self.room_list.remove(username)
 
     def broadcast_room_list(self):
         room_list_msg = {
@@ -59,6 +64,7 @@ class ChatWebSocketHandler(WebSocket):
                     self.room_list[self.room_list.index(msg['username'])] =  msg['new_name']
                     self.room_list.sort()
                     self.broadcast_room_list()
+                    self.socket_user_map[self] = msg['new_name']
 
                     return_msg = {
                         "type": "EVENT",
@@ -81,6 +87,7 @@ class ChatWebSocketHandler(WebSocket):
                     self.room_list.append(userid)
                     self.room_list.sort()
                     self.broadcast_room_list()
+                    self.socket_user_map[self] = userid
 
                     for last_msg in LAST_MSGS:
                         self.send(json.dumps(last_msg), False)
@@ -90,8 +97,14 @@ class ChatWebSocketHandler(WebSocket):
                         "event": 'SIGN_ON',
                         "username": userid
                     }
+                elif msg ['event'] == "RESIGN_ON":
+                    self.socket_user_map[self] = msg['username']
+
                 elif msg['event'] == "SIGN_OFF":
-                    # self.room_list.remove(msg['username'])
+                    username = msg['username']
+                    if username in self.room_list:
+                        self.room_list.remove(username)
+
                     self.broadcast_room_list()
                     return_msg = {
                         "type": 'EVENT',

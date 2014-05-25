@@ -37,6 +37,10 @@ $(function () {
                 for (var i = 0; i < roomList.length; i++) {
                     $roomList.append("<div>" + roomList[i] + "</div>");
                 }
+            } else if (msg.info = "USERNAME_QUERY_REQUEST") {
+                msg = new InfoMessage();
+                msg.info = "USERNAME_QUERY_RESPONSE";
+                socket.sendMessage(msg);
             }
             return false; //handled
         } else if (msg.type == "CODE") {
@@ -66,6 +70,12 @@ $(function () {
     socket.onClose.subscribe(function(evt) {
         msg_obj = new EventMessage('Connection closed by server: ' + evt.code + ' \"' + evt.reason);
         chatWindow.append(msg_obj);
+    });
+
+    socket.onReconnect.subscribe(function(e) {
+        msg = new EventMessage();
+        msg.event = "RESIGN_ON";
+        socket.sendMessage(msg);
     });
 
     socket.connect()

@@ -122,4 +122,16 @@
 
   })(Message);
 
+  this.InfoMessage = (function(_super) {
+    __extends(InfoMessage, _super);
+
+    function InfoMessage(msg) {
+      this.msg = msg;
+      InfoMessage.__super__.constructor.call(this, this.msg, "INFO");
+    }
+
+    return InfoMessage;
+
+  })(Message);
+
 }).call(this);
