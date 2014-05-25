@@ -10,7 +10,7 @@ import shutil
 import json
 
 from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
-from ws4py.websocket import WebSocket
+from ws4py.websocket import WebSocket, Heartbeat
 from ws4py.messaging import TextMessage
 
 LAST_MSGS = []
@@ -25,8 +25,10 @@ class ChatWebSocketHandler(WebSocket):
     room_list = []
     socket_user_map = {}
 
-    def __init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=None):
-        WebSocket.__init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=10)
+    def __init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=30.0):
+        WebSocket.__init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=heartbeat_freq)
+        self.hb = Heartbeat(self, 30.0)
+        self.hb.start()
 
     def opened(self):
         self.socket_user_map[self] = None
