@@ -101,7 +101,7 @@ class ChatWebSocketHandler(WebSocket):
                     }
                 elif msg ['event'] == "RESIGN_ON":
                     self.socket_user_map[self] = msg['username']
-
+                    return
                 elif msg['event'] == "SIGN_OFF":
                     username = msg['username']
                     if username in self.room_list:
