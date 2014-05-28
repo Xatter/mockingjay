@@ -29,6 +29,10 @@ For a completely local installation on linux:
 
 Mostly stolen from here http://forcecarrier.wordpress.com/2013/07/26/installing-pip-virutalenv-in-sudo-free-way/
 
+Clone the repo
+
+    $ git clone https://github.com/xatter/mockingjay.git
+
 Install setuptools first into user local
 
     $ wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
@@ -39,11 +43,12 @@ Then pip:
 	$ curl -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py
 	$ python get-pip.py –user
 
+Add `~/.local/bin` to your `$PATH` variable
+
 Then Virtualenv:
 
 	$ pip install –user virtualenv	
 
-Add `~/.local/bin` to your `$PATH` variable
 
 Then activate the virtualenv and install the requirements:
 

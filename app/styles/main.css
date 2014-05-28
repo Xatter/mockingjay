@@ -28,13 +28,13 @@
 }
 
 #main {
-	width:70%;
+	width:89%;
 	position:relative;
 	z-index:1;
 }
 
 #chat {
-	padding-bottom: 150px;
+	padding-bottom: 100px;
 	background: transparent;
 	position: relative;
 }
@@ -44,7 +44,7 @@
     z-index: 2;
     right: 0px;
     top: 0px;
-    width: 28%;
+    width: 10%;
     height: 100%;
     padding: 45px 10px 0px 0px;
     background: transparent;
