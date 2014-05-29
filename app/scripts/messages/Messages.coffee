@@ -7,8 +7,8 @@ class @Message
     date = new Date(@msg.timestamp);
     time = date.toLocaleTimeString();
     $userContainer = $('<div></div>').addClass('user-container')
-    $timestamp = $('<span></span>').addClass('timestamp').append('[' + time + ']')
-    $userName = $('<span></span>').addClass('username').append(@msg.username + ": ")
+    $timestamp = $('<span></span>').addClass('timestamp').append("[#{time}]")
+    $userName = $('<span></span>').addClass('username').append("#{@msg.username}:")
     $userContainer.append($timestamp)
     $userContainer.append($userName)
 

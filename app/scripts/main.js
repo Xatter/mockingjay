@@ -1,8 +1,9 @@
-var websocket = scheme + "://" + location.hostname + ":" + location.port + "/ws";
-var socket = new Socket(websocket);
 $(function () {
     var $roomList = $('#room_list');
     var roomList = [];
+
+    var websocket = scheme + "://" + location.hostname + ":" + location.port + "/ws";
+    var socket = new Socket(websocket);
 
     var chatWindow = new ChatWindow(socket);
 
@@ -37,10 +38,8 @@ $(function () {
                 for (var i = 0; i < roomList.length; i++) {
                     $roomList.append("<div>" + roomList[i] + "</div>");
                 }
-            } else if (msg.info = "USERNAME_QUERY_REQUEST") {
-                msg = new InfoMessage();
-                msg.info = "USERNAME_QUERY_RESPONSE";
-                socket.sendMessage(msg);
+            } else if (msg.info == "ROOM_STATE") {
+
             }
             return false; //handled
         } else if (msg.type == "CODE") {

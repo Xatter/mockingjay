@@ -15,12 +15,12 @@ Features
 
 # Incomplete list of Missing features:
 ------------------------------------
-* Currently it keeps no logs
+* ~~Currently it keeps no logs~~
 * Stores no user preferences (except username)
 * No rooms
 * No private messages
 * ~~No cat pictures (this is priority one to be fixed)~~
-* No SECURITY of any kind, in fact this is laughably hackable. *You should not deploy this to the public internet!*
+* ~~No SECURITY~~ minimal security
 
 Installation
 ============

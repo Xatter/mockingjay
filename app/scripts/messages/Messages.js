@@ -17,8 +17,8 @@
       date = new Date(this.msg.timestamp);
       time = date.toLocaleTimeString();
       $userContainer = $('<div></div>').addClass('user-container');
-      $timestamp = $('<span></span>').addClass('timestamp').append('[' + time + ']');
-      $userName = $('<span></span>').addClass('username').append(this.msg.username + ": ");
+      $timestamp = $('<span></span>').addClass('timestamp').append("[" + time + "]");
+      $userName = $('<span></span>').addClass('username').append("" + this.msg.username + ":");
       $userContainer.append($timestamp);
       return $userContainer.append($userName);
     };

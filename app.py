@@ -91,8 +91,15 @@ class ChatWebSocketHandler(WebSocket):
                     self.broadcast_room_list()
                     self.socket_user_map[self] = userid
 
-                    for last_msg in LAST_MSGS:
-                        self.send(json.dumps(last_msg), False)
+                    room_state_msg = {
+                        'type': 'INFO',
+                        'info': 'ROOM_STATE',
+                        'title': 'MockingJay',
+                        'room_list': self.room_list,
+                        'history': LAST_MSGS
+                    }
+
+                    self.send(json.dumps(room_state_msg), False)
 
                     return_msg = {
                         "type": 'EVENT',

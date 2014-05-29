@@ -17,6 +17,7 @@
 
 .username {
     font-weight: bold;
+    padding-left: 5px;
 }
 
 .highlight {
@@ -24,7 +25,7 @@
 }
 
 .timestamp {
-  color: gray;
+    color: gray;
 }
 
 #main {
