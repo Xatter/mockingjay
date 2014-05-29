@@ -13,7 +13,7 @@ Features
 * Simple file sharing of any file, any size, any type by dragging and dropping
   * Typically log files are too large, or sending binaries to testers is difficult as they get filtered by enterprise mail filters
 
-Incomplete list of Missing features:
+# Incomplete list of Missing features:
 ------------------------------------
 * Currently it keeps no logs
 * Stores no user preferences (except username)
@@ -40,15 +40,14 @@ Install setuptools first into user local
 
 Then pip:
 
-	$ curl -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py
-	$ python get-pip.py –user
+    $ curl -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py
+    $ python get-pip.py –user
 
 Add `~/.local/bin` to your `$PATH` variable
 
 Then Virtualenv:
 
-	$ pip install –user virtualenv	
-
+    $ pip install –user virtualenv
 
 Then activate the virtualenv and install the requirements:
 
@@ -58,7 +57,7 @@ Then activate the virtualenv and install the requirements:
 
 Then run and connect:
 
-	$ python app.py
+    $ python app.py
 
 Point your browser to http://localhost:9000/
 
