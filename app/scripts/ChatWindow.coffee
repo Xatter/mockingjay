@@ -2,7 +2,7 @@ class UnreadCountManager
   constructor: (@socket) ->
     @unreadCount = 0
 
-    @socket.onMessage.subscribe (e) ->
+    @socket.onMessage.subscribe (e) =>
       @unreadCount++
       @_updateTitle()
 
