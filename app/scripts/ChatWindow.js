@@ -17,9 +17,11 @@
       this.titleManager = titleManager;
       this.unreadCount = 0;
       this.socket.onMessage.subscribe((function(_this) {
-        return function(e) {
-          _this.unreadCount++;
-          return _this._updateTitle();
+        return function(msg) {
+          if (msg.type !== 'INFO') {
+            _this.unreadCount++;
+            return _this._updateTitle();
+          }
         };
       })(this));
       $(window).mousemove((function(_this) {
@@ -79,7 +81,8 @@
     }
 
     ChatWindow.prototype._autoScroll = function() {
-      return this.maxScrollHeight = $(window).scrollTop($(window).height()).scrollTop();
+      this.maxScrollHeight = $(window).scrollTop($(window).height()).scrollTop();
+      return console.log(this.maxScrollHeight);
     };
 
     ChatWindow.prototype.update = function() {

@@ -65,7 +65,8 @@ class @Socket
 
     @_ws.onmessage =  (e) =>
       console.debug('Socket', 'onmessage', @connect_string, event.data) if @debug
-      @onMessage.trigger(e)
+      msg = JSON.parse(e.data)
+      @onMessage.trigger(msg)
 
     @_ws.onerror = (e) =>
       console.debug('Socket', 'onerror', @connect_string, event) if @debug

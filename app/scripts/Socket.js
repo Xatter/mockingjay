@@ -96,10 +96,12 @@
       })(this);
       this._ws.onmessage = (function(_this) {
         return function(e) {
+          var msg;
           if (_this.debug) {
             console.debug('Socket', 'onmessage', _this.connect_string, event.data);
           }
-          return _this.onMessage.trigger(e);
+          msg = JSON.parse(e.data);
+          return _this.onMessage.trigger(msg);
         };
       })(this);
       return this._ws.onerror = (function(_this) {

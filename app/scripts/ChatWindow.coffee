@@ -5,9 +5,10 @@ class UnreadCountManager
   constructor: (@socket, @titleManager) ->
     @unreadCount = 0
 
-    @socket.onMessage.subscribe (e) =>
-      @unreadCount++
-      @_updateTitle()
+    @socket.onMessage.subscribe (msg) =>
+      if msg.type != 'INFO'
+        @unreadCount++
+        @_updateTitle()
 
     $(window).mousemove (e) =>
       @_resetUnreadCount()
@@ -53,6 +54,7 @@ class @ChatWindow
 
   _autoScroll: ->
     @maxScrollHeight = $(window).scrollTop($(window).height()).scrollTop()
+    console.log @maxScrollHeight
 
   update: ->
     # Prevent the window from getting too full and slowing everything down.

@@ -84,22 +84,16 @@ class ChatWebSocketHandler(WebSocket):
                         userid += str((random.randrange(0,100)))
 
                     msg['username'] = userid
+                    msg['title'] = 'MockingJay'
+                    msg['room_list'] = self.room_list
+                    msg['history'] = LAST_MSGS
+
                     self.send(json.dumps(msg), False)
 
                     self.room_list.append(userid)
                     self.room_list.sort()
                     self.broadcast_room_list()
                     self.socket_user_map[self] = userid
-
-                    room_state_msg = {
-                        'type': 'INFO',
-                        'info': 'ROOM_STATE',
-                        'title': 'MockingJay',
-                        'room_list': self.room_list,
-                        'history': LAST_MSGS
-                    }
-
-                    self.send(json.dumps(room_state_msg), False)
 
                     return_msg = {
                         "type": 'EVENT',

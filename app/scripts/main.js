@@ -7,11 +7,14 @@ $(function () {
 
     var chatWindow = new ChatWindow(socket);
 
-    socket.onMessage.subscribe(function (e) {
-        msg = JSON.parse(e.data);
+    function process_message(msg) {
         if (msg.type == "EVENT") {
             if (msg.event == "FIRST_SIGN_ON") {
                 username = msg.username;
+
+                for (var i = 0;i < msg.history.length;i++) {
+                    process_message(msg.history[i]);
+                }
 
                 msg_obj = new EventMessage("<strong>Welcome, " + username + "</strong> if you would like to change your name type '/nick [username]' into the chat box below.");
                 chatWindow.append(msg_obj);
@@ -51,7 +54,9 @@ $(function () {
         }
 
         chatWindow.append(msg_obj);
-    });
+    }
+
+    socket.onMessage.subscribe(process_message);
 
     socket.onOpen.subscribe(function(event) {
         msg = {
