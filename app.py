@@ -27,8 +27,9 @@ class ChatWebSocketHandler(WebSocket):
 
     def __init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=30.0):
         WebSocket.__init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=heartbeat_freq)
-        # self.hb = Heartbeat(self, 30.0)
-        # self.hb.start()
+        self.hb = Heartbeat(self, 30.0)
+        self.hb.setDaemon(True)
+        self.hb.start()
 
     def opened(self):
         self.socket_user_map[self] = None
