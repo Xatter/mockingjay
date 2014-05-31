@@ -1,20 +1,18 @@
 Description
------------
+===========
 This is a very simple web server and chat page. There is only one room, no logins, everyone can see what everyone else says.
 This is intended for internal teams to deploy to the LAN when you can't use normal chat services like IRC or Hipchat because of security policies or whatever.
 
 I built this as a place for teams of programmers, dev ops, testers, etc to be able to more effectively communicate with one another without paying per user or having to use someone else's servers.
 As such this chat system has a few interesting features to that end:
 
-Features
-========
+# Features
 * Code formatting and syntax highlighting
 * Simple image sharing by dragging and dropping an image anywhere on the window and it will show up in the chat (screen shots, cat pictures, memes)
 * Simple file sharing of any file, any size, any type by dragging and dropping
   * Typically log files are too large, or sending binaries to testers is difficult as they get filtered by enterprise mail filters
 
 # Incomplete list of Missing features:
-------------------------------------
 * ~~Currently it keeps no logs~~
 * Stores no user preferences (except username)
 * No rooms
@@ -22,8 +20,7 @@ Features
 * ~~No cat pictures (this is priority one to be fixed)~~
 * ~~No SECURITY~~ minimal security
 
-Installation
-============
+# Installation
 
 For a completely local installation on linux:
 
@@ -61,5 +58,8 @@ Then run and connect:
 
 Point your browser to http://localhost:9000/
 
-
 [LIVE DEMO](http://chat.extroverteddeveloper.com/)
+
+Although meant for the LAN it actually does work on Heroku. The live demo is running on Heroku.
+
+
