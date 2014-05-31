@@ -123,26 +123,32 @@ $(function () {
     $('#fileupload').fileupload({
         dataType: 'json',
         paramName: 'myFile',
+        complete: function (e, data) {
+            $('#progress').remove();
+        },
         done: function (e, data) {
-            $.each(data.result.files, function (index, file) {
-                $img = $("<img/>");
-                $img.src = file.name;
-                console.log($img);
-            });
+            $('#progress').remove();
         },
         add: function (e, data) {
             data.formData = {username: username};
+            var $ui = $('<div id="progress" class="progress"><div class="progress-bar progress-success" style="width: 0%;"></div></div>');
+            $ui.prependTo($('#input-area'))
 
             if (e.isDefaultPrevented()) {
                 return false;
             }
+
             if (data.autoUpload || (data.autoUpload !== false &&
                 $(this).fileupload('option', 'autoUpload'))) {
                 data.process().done(function () {
                     data.submit();
                 });
             }
-
+        },
+        progress: function (e, data) {
+            progress = parseInt(data.loaded / data.total * 100, 10);
+            $('#progress .progress-bar').css('width', progress + '%');
         }
-    });
+    }).on('fileuploaddone', function (e, data) {
+        });
 });
