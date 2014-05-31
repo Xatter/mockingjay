@@ -67,9 +67,9 @@ class @FileMessage extends Message
   as_html: ->
     $userContainer = @_createUserContainer();
     if @msg.contentType.substring(0, 5) == ('image')
-      text = '<img src="' + this.msg.url + '"/>';
+      text = "<img src='#{@msg.url}'/>"
     else
-      text = "<a href='" + this.msg.url + "' target='_blank'>" + this.msg.fileName + "</a>";
+      text = "<a href='#{@msg.url}' target='_blank' download='#{@msg.fileName}'>#{@msg.fileName}</a>"
 
     $userContainer.append(text);
 

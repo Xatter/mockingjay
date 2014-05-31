@@ -27,8 +27,8 @@ class ChatWebSocketHandler(WebSocket):
 
     def __init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=30.0):
         WebSocket.__init__(self, sock, protocols=None, extensions=None, environ=None, heartbeat_freq=heartbeat_freq)
-        self.hb = Heartbeat(self, 30.0)
-        self.hb.start()
+        # self.hb = Heartbeat(self, 30.0)
+        # self.hb.start()
 
     def opened(self):
         self.socket_user_map[self] = None
@@ -162,13 +162,15 @@ class Root(object):
                 tmp.write(data)
                 size+=len(data)
 
-        target = os.path.join(os.getcwd() + '/app/tmp', myFile.filename)
+        fileName, fileExtension = os.path.splitext(myFile.filename)
+        tempFileName = os.path.basename(tmp.name) + fileExtension
+        target = os.path.join(os.getcwd() + '/app/tmp', tempFileName)
         shutil.move(tmp.name, target)
 
         msg = {
             'type': 'FILE',
             'username': username,
-            'url': '/tmp/' + str(myFile.filename),
+            'url': '/tmp/' + tempFileName,
             'fileName': str(myFile.filename),
             'contentType': str(myFile.content_type)
         }
@@ -186,6 +188,7 @@ if __name__ == '__main__':
     parser.add_argument('--host', default='0.0.0.0')
     parser.add_argument('-p', '--port', default=9000, type=int)
     parser.add_argument('--ssl', action='store_true')
+    parser.add_argument('--heartbeat', action='store', type=float)
     args = parser.parse_args()
 
     cherrypy.config.update({'server.socket_host': args.host,

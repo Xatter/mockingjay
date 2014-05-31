@@ -99,9 +99,9 @@
       var $userContainer, text;
       $userContainer = this._createUserContainer();
       if (this.msg.contentType.substring(0, 5) === 'image') {
-        text = '<img src="' + this.msg.url + '"/>';
+        text = "<img src='" + this.msg.url + "'/>";
       } else {
-        text = "<a href='" + this.msg.url + "' target='_blank'>" + this.msg.fileName + "</a>";
+        text = "<a href='" + this.msg.url + "' target='_blank' download='" + this.msg.fileName + "'>" + this.msg.fileName + "</a>";
       }
       return $userContainer.append(text);
     };

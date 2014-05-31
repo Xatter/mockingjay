@@ -41,8 +41,6 @@ $(function () {
                 for (var i = 0; i < roomList.length; i++) {
                     $roomList.append("<div>" + roomList[i] + "</div>");
                 }
-            } else if (msg.info == "ROOM_STATE") {
-
             }
             return false; //handled
         } else if (msg.type == "CODE") {
