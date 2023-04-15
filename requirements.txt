@@ -1,5 +1,5 @@
 CherryPy==3.3.0
-Jinja2==2.7.2
+Jinja2==2.11.3
 MarkupSafe==0.23
 ws4py==0.3.4
 wsgiref==0.1.2
